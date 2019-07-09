@@ -1,0 +1,1 @@
+SQUARE_SIZE = 30
