@@ -1,6 +1,8 @@
 import pygame_widgets
+import entities
 import files
 import constants
+from exceptions import FileFormatError
 from multidimensional_array import Multidimensional_array as Md_array
 
 
@@ -9,6 +11,8 @@ class Gamefield(pygame_widgets.Holder):
         super().__init__(master)
         self.level = 0
         self.map_widgets = None
+        self.pampuch = None
+        self.monsters = list()
 
     def load_map(self, index):
         files.Textures.load(index)
@@ -24,3 +28,19 @@ class Gamefield(pygame_widgets.Holder):
                                                          else files.Textures.point)
             if field != constants.CHAR_WALL:
                 self.map_widgets[pos].attr.img_empty = files.Textures.empty
+                self.map_widgets[pos].attr.type = 'point'
+            else:
+                self.map_widgets[pos].attr.type = 'wall'
+            if field == constants.CHAR_PAMPUCH:
+                self.pampuch = pos
+                self.map_widgets[pos].attr.type = 'empty'
+                self.map_widgets[pos].set(image=files.Textures.empty)
+            elif field == constants.CHAR_MONSTER:
+                self.monsters.append(pos)
+        try:
+            self.pampuch = entities.Pampuch(self, self.pampuch)
+        except FileFormatError as error:
+            error.level_index = index
+            raise error
+        for index, pos in enumerate(self.monsters):
+            self.monsters[index] = entities.Monster(self, pos)

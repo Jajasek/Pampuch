@@ -14,6 +14,8 @@ class Textures:
     wall = None
     point = None
     empty = None
+    pampuch = None
+    monster = None
     window = THECOLORS['black']
 
     def __init__(self):
@@ -22,8 +24,10 @@ class Textures:
     @classmethod
     def load(cls, index):
         cls.wall = THECOLORS['gray50']
-        cls.point = THECOLORS['pink3']
+        cls.point = THECOLORS['salmon']
         cls.empty = THECOLORS['transparent']
+        cls.pampuch = THECOLORS['yellow']
+        cls.monster = THECOLORS['blue3']
         cls.window = THECOLORS['black']
 
 

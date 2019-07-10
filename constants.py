@@ -4,3 +4,4 @@ CHAR_WALL = '#'
 CHAR_EMPTY = ' '
 CHAR_MONSTER = 'X'
 CHAR_PAMPUCH = 'P'
+FPS = 16

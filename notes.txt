@@ -1,0 +1,1 @@
+4 squares per second, framerate 16 Hz
