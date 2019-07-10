@@ -1,6 +1,8 @@
 PATH = "D:/Jáchym/Programování/Python/Pampuch"
 SQUARE_SIZE = 30
+STEP = 10  # must be a divider of SQUARE_SIZE
 CHAR_WALL = '#'
+CHAR_POINT = '.'
 CHAR_EMPTY = ' '
 CHAR_MONSTER = 'X'
 CHAR_PAMPUCH = 'P'

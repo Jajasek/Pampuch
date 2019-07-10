@@ -11,4 +11,4 @@ Gamefield.load_map(0)
 while True:
     Window.handle_events(*pygame_widgets.pygame.event.get())
     Window.update_display()
-    pygame_widgets.pygame.event.post(PYGAME_WIDGETS, ID=E_LOOP_STARTED)
+    pygame_widgets.new_loop()

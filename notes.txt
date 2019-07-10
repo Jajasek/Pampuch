@@ -1,1 +1,2 @@
 4 squares per second, framerate 16 Hz
+countdown: 4 if previous direction was None else 1
