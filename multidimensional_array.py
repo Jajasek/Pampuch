@@ -1,4 +1,4 @@
-class Enumerating_iterator:
+class Enumerated_iterator:
     def __init__(self, array):
         self.array = array
 
@@ -22,7 +22,7 @@ class Multidimensional_array(list):
 
     def __init__(self, dimensions=(1, 1), iterable=None, fill=None):
         self._ID = Multidimensional_array._next_ID
-        self.enumerated = Enumerating_iterator(self)
+        self.enumerated = Enumerated_iterator(self)
         self._fill = fill
         self._number_of_dimensions = 0
         self._stop = False
