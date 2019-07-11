@@ -56,16 +56,6 @@ class Multidimensional_array(list):
         super().__init__(sublists)
 
     def __getitem__(self, coordinates):
-        """try:
-            iter(coordinates)
-        except TypeError:
-            coordinates = [coordinates]
-        coordinates = list(coordinates)
-        if len(coordinates) < self._number_of_dimensions:
-            coordinates += [slice(None) for _ in range(self._number_of_dimensions - len(coordinates))]
-        elif len(coordinates) > self._number_of_dimensions:
-            coordinates = coordinates[:self._number_of_dimensions]
-        coordinates.reverse()"""
         coordinates = self._complete_coordinates(coordinates)
         coordinate = coordinates[0]
         if coordinate is None:

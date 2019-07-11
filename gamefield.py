@@ -36,6 +36,8 @@ class Gamefield(pygame_widgets.Holder):
                 self.map_widgets[pos].attr.type = 'point'
                 self.map_widgets[pos].set(image=files.Textures.point)
             if field == constants.CHAR_PAMPUCH:
+                if self.pampuch is not None:
+                    raise FileFormatError('Pampuch must be instanced exactly once per level', level_index=index)
                 self.pampuch = pos
             elif field == constants.CHAR_MONSTER:
                 self.monsters.append(pos)
@@ -45,4 +47,14 @@ class Gamefield(pygame_widgets.Holder):
             error.level_index = index
             raise error
         for index, pos in enumerate(self.monsters):
-            self.monsters[index] = entities.Monster(self, pos)
+            self.monsters[index] = entities.Monster(self, pos, self.pampuch)
+        for m in self.monsters:
+            others = self.monsters.copy()
+            others.remove(m)
+            m.colleagues = others
+
+    def pause(self, value=None):
+        if value is None:
+            return self.pampuch.pause
+        for e in self.monsters + [self.pampuch]:
+            e.pause(value)

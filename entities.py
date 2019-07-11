@@ -1,39 +1,77 @@
 import pygame_widgets
 import constants
 import files
-from exceptions import FileFormatError
+from exceptions import FileFormatError, UnknownError
+from random import choice
+
+
+def left(direction):
+    return (direction + 1) % 4
+
+
+def leftall(direction):
+    return tuple([left(direction + f) for f in [-0.5, 0, 0.5]])
+
+
+def right(direction):
+    return (direction - 1) % 4
+
+
+def rightall(direction):
+    return tuple([right(direction + f) for f in [-0.5, 0, 0.5]])
 
 
 class Entity(pygame_widgets.Image):
-    play = False
-
-    @classmethod
-    def start(cls):
-        cls.play = True
-
-    @classmethod
-    def stop(cls):
-        cls.play = False
-
     def __init__(self, master, pos, image):
         self.starting_position = [pos[i] * constants.SQUARE_SIZE for i in range(2)]
         super().__init__(master, self.starting_position, [constants.SQUARE_SIZE for _ in range(2)], image=image)
         self.direction = None  # from 0 to 3, 0 = right, cc
+        self.paused = False
         self._move_mappings = {0: (constants.STEP, 0),
-                               1: (0, constants.STEP),
+                               1: (0, -constants.STEP),
                                2: (-constants.STEP, 0),
-                               3: (0, -constants.STEP)}
-        self.add_handler(pygame_widgets.constants.E_LOOP_STARTED, self.step, self_arg=False, event_arg=False)
+                               3: (0, constants.STEP)}
+        self.add_handler(pygame_widgets.constants.E_LOOP_STARTED, self.step, [isinstance(self, Monster)],
+                         self_arg=False, event_arg=False)
 
-    def step(self):
-        if self.direction is not None:
+    def pause(self, value=None):
+        if value is None:
+            return self.paused
+        self.paused = bool(value)
+
+    def step(self, stop=True):
+        if self.direction is not None and not self.paused:
             self.move_resize(self._move_mappings[self.direction])
             for square in self.surroundings():
+                # intersection = self.master_rect.clip(square.master_rect)
+                # intersection.width > 2 and intersection.height > 2
                 if square.attr.type == 'wall' and self.master_rect.colliderect(square.master_rect):
                     self.move_resize(self._move_mappings[(self.direction + 2) % 4])
-                    self.direction = None
+                    if stop:
+                        self.stop()
                     return False
+            if isinstance(self, Monster):
+                for monster in self.colleagues:
+                    if self.master_rect.colliderect(monster.master_rect):
+                        self.move_resize(self._move_mappings[(self.direction + 2) % 4])
+                        if stop:
+                            self.stop()
+                        return False
             return True
+
+    def try_step(self, direction):
+        current = self.direction
+        self.direction = direction
+        output = Entity.step(self, False)
+        if output:
+            self.move_resize(self._move_mappings[(self.direction + 2) % 4])
+            self.direction = current
+            return True
+        self.direction = current
+        return False
+
+    def stop(self):
+        self.direction = None
 
     def surroundings(self):
         coordinates = [None, None]
@@ -47,14 +85,15 @@ class Entity(pygame_widgets.Image):
                 coordinates[i] = slice(topleft[i], topleft[i] + 2)
         return self.master.map_widgets[coordinates]
 
+    @property
+    def position(self):
+        return self.master_rect.topleft
+
 
 class Pampuch(Entity):
-    _instanced = False
-
     def __init__(self, master, pos):
-        if Pampuch._instanced or pos is None:
+        if pos is None:
             raise FileFormatError('Pampuch must be instanced exactly once per level')
-        Pampuch._instanced = True
         Entity.__init__(self, master, pos, files.Textures.pampuch)
         self.new_direction = None
         self.points = 0
@@ -66,11 +105,11 @@ class Pampuch(Entity):
     def change_direction(self, event):
         if event.key == pygame_widgets.constants.K_d:
             self.new_direction = 0
-        elif event.key == pygame_widgets.constants.K_s:
+        elif event.key == pygame_widgets.constants.K_w:
             self.new_direction = 1
         elif event.key == pygame_widgets.constants.K_a:
             self.new_direction = 2
-        elif event.key == pygame_widgets.constants.K_w:
+        elif event.key == pygame_widgets.constants.K_s:
             self.new_direction = 3
         elif event.key == pygame_widgets.constants.K_SPACE:
             self.new_direction = None
@@ -80,13 +119,15 @@ class Pampuch(Entity):
         for i in range(2):
             if topleft[i] % constants.SQUARE_SIZE:
                 return
-        current = self.direction
+        if self.try_step(self.new_direction) or self.new_direction is None:
+            self.direction = self.new_direction
+        """current = self.direction
         self.direction = self.new_direction
-        out = self.step()
-        if out:
+        output = self.step()
+        if output:
             self.move_resize(self._move_mappings[(self.direction + 2) % 4])
-        elif out is False:
-            self.direction = current
+        elif output is False:
+            self.direction = current"""
 
     def point(self):
         for square in self.surroundings():
@@ -99,5 +140,122 @@ class Pampuch(Entity):
 
 
 class Monster(Entity):
-    def __init__(self, master, pos):
+    def __init__(self, master, pos, target):
         Entity.__init__(self, master, pos, files.Textures.monster)
+        self.target = target
+        self.direction_old = None
+        self.cooldown = 0
+        self.colleagues = None
+
+    def step(self, stop=True):
+        if self.cooldown:
+            self.cooldown -= 1
+            self.direction = self.find_direction()
+            if self.direction is None:
+                self.cooldown = 0
+        else:
+            if self.direction is None:
+                self.direction = self.find_direction()
+                if self.direction is not None:
+                    self.cooldown = 4
+                return
+            output = Entity.step(self, stop)
+            if output is not None:
+                self.direction_old = self.direction
+            return output
+
+    def stop(self):
+        self.direction = self.find_direction()
+        if self.direction is None:
+            self.direction_old = None
+        else:
+            self.cooldown = 1
+
+    def target_relative(self):
+        relative_xy = [0, 0]
+        relative = -1
+        for i in range(2):
+            if self.position[i] - self.target.position[i] > constants.SQUARE_SIZE - constants.STEP:
+                relative_xy[i] = -1
+            elif self.target.position[i] - self.position[i] > constants.SQUARE_SIZE - constants.STEP:
+                relative_xy[i] = 1
+        x, y = relative_xy
+        if x > 0:
+            relative = 0
+        if y < 0:
+            relative = 1
+        if x < 0:
+            relative = 2
+        if y > 0:
+            relative = 3
+        if (x > 0) and (y < 0):
+            relative = 0.5
+        if (x < 0) and (y < 0):
+            relative = 1.5
+        if (x < 0) and (y > 0):
+            relative = 2.5
+        if (x > 0) and (y > 0):
+            relative = 3.5
+        return relative
+
+    def open_directions(self):
+        output = [None] * 4
+        for direction in range(4):
+            output[direction] = self.try_step(direction)
+        return output
+
+    def find_direction(self):
+        open_directions = self.open_directions()
+        target_relative = self.target_relative()
+        if self.direction_old is None:
+            if isinstance(target_relative, int):
+                if open_directions[target_relative]:
+                    return target_relative
+                if open_directions[left(target_relative)] and open_directions[right(target_relative)]:
+                    return None
+                if open_directions[left(target_relative)]:
+                    return left(target_relative)
+                if open_directions[right(target_relative)]:
+                    return right(target_relative)
+                return None
+            possible = [int(target_relative + 0.5) % 4, int(target_relative - 0.5)]
+            for p in possible:
+                if not open_directions[p]:
+                    possible.remove(p)
+            if possible:
+                return choice(possible)
+            return None
+        if open_directions[self.direction_old]:
+            return self.direction_old
+        if target_relative == self.direction_old:
+            if open_directions[left(self.direction_old)] and not open_directions[right(self.direction_old)]:
+                return left(self.direction_old)
+            if not open_directions[left(self.direction_old)] and open_directions[right(self.direction_old)]:
+                return right(self.direction_old)
+            return None
+        if target_relative == left(left(self.direction_old)):
+            if open_directions[left(self.direction_old)] and open_directions[right(self.direction_old)]:
+                return choice([left, right])(self.direction_old)
+            if open_directions[left(left(self.direction_old))]:
+                return left(left(self.direction_old))
+            if open_directions[left(self.direction_old)]:
+                return left(self.direction_old)
+            if open_directions[right(self.direction_old)]:
+                return right(self.direction_old)
+            return None
+        if target_relative in leftall(self.direction_old):
+            if open_directions[left(self.direction_old)]:
+                return left(self.direction_old)
+            if target_relative == left(self.direction_old - 0.5):
+                return None
+            if open_directions[left(left(self.direction_old))]:
+                return left(left(self.direction_old))
+            return None
+        if target_relative in rightall(self.direction_old):
+            if open_directions[right(self.direction_old)]:
+                return right(self.direction_old)
+            if target_relative == right(self.direction_old + 0.5):
+                return None
+            if open_directions[left(left(self.direction_old))]:
+                return left(left(self.direction_old))
+            return None
