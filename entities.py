@@ -31,8 +31,7 @@ class Entity(pygame_widgets.Image):
                                1: (0, -constants.STEP),
                                2: (-constants.STEP, 0),
                                3: (0, constants.STEP)}
-        self.add_handler(pygame_widgets.constants.E_LOOP_STARTED, self.step, [isinstance(self, Monster)],
-                         self_arg=False, event_arg=False)
+        self.add_handler(pygame_widgets.constants.E_LOOP_STARTED, self.step, self_arg=False, event_arg=False)
 
     def pause(self, value=None):
         if value is None:
@@ -137,6 +136,8 @@ class Pampuch(Entity):
                 self.points += 1
                 square.attr.type = 'empty'
                 square.set(image=square.attr.img_empty)
+                if self.points == self.master.goal:
+                    self.master.level_completed()
 
 
 class Monster(Entity):
@@ -147,7 +148,15 @@ class Monster(Entity):
         self.cooldown = 0
         self.colleagues = None
 
+    def check(self):
+        intersection = self.master_rect.clip(self.target.master_rect).size
+        for l in intersection:
+            if l < 2 * constants.STEP:
+                return
+        self.master.death()
+
     def step(self, stop=True):
+        self.check()
         if self.cooldown:
             self.cooldown -= 1
             self.direction = self.find_direction()

@@ -17,7 +17,7 @@ label_fps = pygame_widgets.Label(window, auto_res=True, font_color=THECOLORS['ye
 button_exit = pygame_widgets.Button(window, (0, 18), (100, 17), text="Exit")
 button_exit.add_handler(E_BUTTON_BUMPED, button_wrapper(window.quit))
 gamefield = Gamefield(window)
-gamefield.load_map(0)
+gamefield.load_map(-1)
 
 while True:
     window.handle_events(*pygame_widgets.pygame.event.get())

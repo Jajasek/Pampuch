@@ -15,6 +15,7 @@ class Textures:
     point = None
     empty = None
     pampuch = None
+    dead = None
     monster = None
     window = THECOLORS['black']
 
@@ -27,6 +28,7 @@ class Textures:
         cls.point = THECOLORS['salmon']
         cls.empty = THECOLORS['transparent']
         cls.pampuch = THECOLORS['yellow']
+        cls.dead = THECOLORS['red3']
         cls.monster = THECOLORS['blue3']
         cls.window = THECOLORS['black']
 
