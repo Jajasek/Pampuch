@@ -21,6 +21,7 @@ class Gamefield(pygame_widgets.Holder):
         self.pampuch = None
         self.monsters = list()
         self.restarting = False
+        self.game_completed = False
         self.label_info = pygame_widgets.Label(self, visible=False, font="trebuchet_ms", font_size=60, alignment_x=1,
                                                alignment_y=1, font_color=THECOLORS['white'], bold=True, italic=True,
                                                cursor=cursors.invisible)
@@ -35,6 +36,7 @@ class Gamefield(pygame_widgets.Holder):
         self.load_map(level)
 
     def info(self, death=True):
+        self.game_completed = True
         x, y = self.master_rect.size
         self.label_info.move_resize((0, (y - (x // constants.LABEL_RATIO)) // 2), 0, (x, x // constants.LABEL_RATIO),
                                     False)
@@ -104,11 +106,12 @@ class Gamefield(pygame_widgets.Holder):
 
     def restart(self):
         self.restarting = False
-        self.lives -= 1
         if self.lives:
+            self.lives -= 1
             self.pampuch.reset_image()
             self.pampuch.move_resize(self.pampuch.starting_position, 0)
             self.pampuch.direction = None
+            self.pampuch.new_direction = list()
             for m in self.monsters:
                 m.move_resize(m.starting_position, 0)
                 m.direction = None

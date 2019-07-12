@@ -30,6 +30,7 @@ class Entity(pygame_widgets.Image):
         super().__init__(master, self.starting_position, [constants.SQUARE_SIZE for _ in range(2)],
                          image=image.frames[image.cur][0], cursor=cursors.invisible)
         self.direction = None  # from 0 to 3, 0 = right, cc
+        self.ignored = None
         self.paused = False
         self._move_mappings = {0: (constants.STEP, 0),
                                1: (0, -constants.STEP),
@@ -46,9 +47,13 @@ class Entity(pygame_widgets.Image):
         if self.direction is not None and not self.paused:
             self.move_resize(self._move_mappings[self.direction])
             for square in self.surroundings():
-                # intersection = self.master_rect.clip(square.master_rect)
-                # intersection.width > 2 and intersection.height > 2
+                if square == self.ignored:
+                    continue
                 if square.attr.type == 'wall' and self.master_rect.colliderect(square.master_rect):
+                    intersection = self.master_rect.clip(square.master_rect)
+                    if intersection.size == (constants.STEP, constants.STEP):
+                        self.ignored = square
+                        continue
                     self.move_resize(self._move_mappings[(self.direction + 2) % 4])
                     if stop:
                         self.stop()
@@ -60,9 +65,25 @@ class Entity(pygame_widgets.Image):
                         if stop:
                             self.stop()
                         return False
+            if self.ignored:
+                self.check_ignored()
             if stop:
                 self.next_image()
             return True
+
+    def check_ignored(self):
+        if not self.master_rect.colliderect(self.ignored.master_rect):
+            self.ignored = None
+            return
+        x, y = [self.ignored.master_rect.topleft[i] - self.master_rect.topleft[i] for i in range(2)]
+        if self.direction % 2:
+            if abs(x) == constants.STEP * 3 and not y:
+                dir_ = -(x // abs(x))
+                self.move_resize((dir_ * constants.STEP, 0))
+        else:
+            if abs(y) == constants.STEP * 3 and not x:
+                dir_ = -(y // abs(y))
+                self.move_resize((0, dir_ * constants.STEP))
 
     def next_image(self):
         self.gif.cur = (self.gif.cur + 1) % self.gif.length()
@@ -104,7 +125,7 @@ class Pampuch(Entity):
         if pos is None:
             raise FileFormatError('Pampuch must be instanced exactly once per level')
         Entity.__init__(self, master, pos, files.Textures.pampuch)
-        self.new_direction = None
+        self.new_direction = list()
         self.points = 0
         self.add_handler(pygame_widgets.constants.KEYDOWN, self.change_direction, self_arg=False)
         self.add_handler(pygame_widgets.constants.E_LOOP_STARTED, self.apply_changes, self_arg=False, event_arg=False)
@@ -113,15 +134,17 @@ class Pampuch(Entity):
 
     def change_direction(self, event):
         if event.key == pygame_widgets.constants.K_d:
-            self.new_direction = 0
+            self.new_direction.append(0)
         elif event.key == pygame_widgets.constants.K_w:
-            self.new_direction = 1
+            self.new_direction.append(1)
         elif event.key == pygame_widgets.constants.K_a:
-            self.new_direction = 2
+            self.new_direction.append(2)
         elif event.key == pygame_widgets.constants.K_s:
-            self.new_direction = 3
+            self.new_direction.append(3)
+        elif event.key == pygame_widgets.constants.K_LSHIFT:
+            self.new_direction = [None]
         elif event.key == pygame_widgets.constants.K_SPACE:
-            self.new_direction = None
+            self.new_direction = list()
 
     def next_image(self):
         self.gif.cur = (self.gif.cur + 1) % self.gif.length()
@@ -137,25 +160,26 @@ class Pampuch(Entity):
         self.set(image=self.gif.frames[self.gif.cur][0])
 
     def apply_changes(self):
-        topleft = self.master_rect.topleft[:]
-        for i in range(2):
-            if topleft[i] % constants.SQUARE_SIZE:
+        while True:
+            print(self.new_direction, self.direction)
+            if not self.new_direction:
                 return
-        if self.try_step(self.new_direction) or self.new_direction is None:
-            self.direction = self.new_direction
-        """current = self.direction
-        self.direction = self.new_direction
-        output = self.step()
-        if output:
-            self.move_resize(self._move_mappings[(self.direction + 2) % 4])
-        elif output is False:
-            self.direction = current"""
+            if self.new_direction[0] == self.direction:
+                self.new_direction.pop(0)
+            elif self.new_direction[0] != self.direction:
+                break
+        for x in self.master_rect.topleft:
+            if x % constants.SQUARE_SIZE:
+                return
+        if self.new_direction[0] is None or self.try_step(self.new_direction[0]):
+            self.direction = self.new_direction.pop(0)
+        elif self.direction is None and not self.paused:
+            self.new_direction.pop(0)
+            self.apply_changes()
 
     def point(self):
         for square in self.surroundings():
-            if square.attr.type == 'point' and abs(self.master_rect.topleft[0] -
-                                                   square.master_rect.topleft[0]) <= constants.STEP \
-                    and abs(self.master_rect.topleft[1] - square.master_rect.topleft[1]) <= constants.STEP:
+            if square.attr.type == 'point' and self.master_rect.topleft == square.master_rect.topleft:
                 self.points += 1
                 square.attr.type = 'empty'
                 square.set(image=square.attr.img_empty)
