@@ -7,6 +7,7 @@ from multidimensional_array import Multidimensional_array as Md_array
 from pygame_widgets.constants import THECOLORS
 from pygame_widgets.auxiliary import cursors
 from pygame.time import set_timer
+from pygame import event
 
 
 class Gamefield(pygame_widgets.Holder):
@@ -96,6 +97,7 @@ class Gamefield(pygame_widgets.Holder):
 
     def death(self):
         self.pause(True)
+        event.post(event.Event(constants.E_DEATH))
         self.pampuch.set(image=self.pampuch.attr.img_dead)
         self.restarting = True
         set_timer(constants.E_GAME_STARTED, constants.INSPECTION)

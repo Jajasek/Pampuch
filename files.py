@@ -37,7 +37,7 @@ class Textures:
         raise TypeError('class Textures cannot be instanced')
 
     @classmethod
-    def load(cls, index):
+    def load(cls, index=None):
         cls.wall = image.load(f"{PATH}/Textures/Wall.gif")
         cls.point = image.load(f"{PATH}/Textures/Point.gif")
         cls.empty = THECOLORS['black']
