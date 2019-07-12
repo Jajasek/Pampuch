@@ -22,6 +22,19 @@ def number_of_levels():
             return index
 
 
+def get_best():
+    try:
+        with open("D:/Jáchym/Programování/Python/Pampuch/best.txt", "r") as file:
+            return int(file.read())
+    except (FileNotFoundError, ValueError):
+        return 0
+
+
+def set_best(value):
+    with open("D:/Jáchym/Programování/Python/Pampuch/best.txt", "w") as file:
+        print(value, end='', file=file)
+
+
 class Textures:
     wall = None
     point = None

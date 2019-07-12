@@ -133,6 +133,8 @@ class Pampuch(Entity):
         self.handlers[pygame_widgets.constants.E_LOOP_STARTED].reverse()
 
     def change_direction(self, event):
+        if len(self.new_direction) > constants.QUEUE_SIZE:
+            return
         if event.key == pygame_widgets.constants.K_d:
             self.new_direction.append(0)
         elif event.key == pygame_widgets.constants.K_w:
@@ -181,6 +183,7 @@ class Pampuch(Entity):
         for square in self.surroundings():
             if square.attr.type == 'point' and self.master_rect.topleft == square.master_rect.topleft:
                 self.points += 1
+                self.master.score += 1
                 square.attr.type = 'empty'
                 square.set(image=square.attr.img_empty)
                 if self.points == self.master.goal:

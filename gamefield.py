@@ -17,11 +17,12 @@ class Gamefield(pygame_widgets.Holder):
         self.levels = files.number_of_levels()
         self.level = 0
         self.goal = 0
+        self.score = 0
         self.map_widgets = None
         self.pampuch = None
         self.monsters = list()
         self.restarting = False
-        self.game_completed = False
+        self.game_finished = False
         self.label_info = pygame_widgets.Label(self, visible=False, font="trebuchet_ms", font_size=60, alignment_x=1,
                                                alignment_y=1, font_color=THECOLORS['white'], bold=True, italic=True,
                                                cursor=cursors.invisible)
@@ -36,7 +37,8 @@ class Gamefield(pygame_widgets.Holder):
         self.load_map(level)
 
     def info(self, death=True):
-        self.game_completed = True
+        self.game_finished = True
+        event.post(event.Event(constants.E_GAME_FINISHED, score=self.score, win=not death))
         x, y = self.master_rect.size
         self.label_info.move_resize((0, (y - (x // constants.LABEL_RATIO)) // 2), 0, (x, x // constants.LABEL_RATIO),
                                     False)
