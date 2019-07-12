@@ -9,7 +9,7 @@ class Live_counter(pygame_widgets.Holder):
         self.lives = constants.LIVES
         super().__init__(master, topleft, (_square * self.lives, _square))
         self.points = [None] * self.lives
-        self.gif = files.Textures.pampuch
+        self.gif = files.Textures.pampuch.copy()
         self.skip = True
         for i in range(self.lives):
             self.points[i] = pygame_widgets.Image(self, ((i * _square) + 2, 2),

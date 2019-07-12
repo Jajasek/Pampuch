@@ -51,7 +51,8 @@ class Textures:
 
     @classmethod
     def load(cls, index=None):
-        cls.wall = image.load(f"{PATH}/Textures/Wall.gif")
+        if index is not None:
+            cls.wall = image.load(f"{PATH}/Textures/Wall{(index // 3) % 3}.gif")
         cls.point = image.load(f"{PATH}/Textures/Point.gif")
         cls.empty = THECOLORS['black']
         cls.pampuch = GIFImage(f"{PATH}/Textures/Pampuch.gif", False)

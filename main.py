@@ -10,7 +10,7 @@ def restart():
     global gamefield
     counter.reset()
     gamefield = Gamefield(window)
-    gamefield.start_game(0)
+    gamefield.start_game(constants.STARTING_LEVEL)
 
 
 Textures.load()

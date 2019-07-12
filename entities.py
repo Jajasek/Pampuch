@@ -80,10 +80,12 @@ class Entity(pygame_widgets.Image):
             if abs(x) == constants.STEP * 3 and not y:
                 dir_ = -(x // abs(x))
                 self.move_resize((dir_ * constants.STEP, 0))
+                self.ignored = None
         else:
             if abs(y) == constants.STEP * 3 and not x:
                 dir_ = -(y // abs(y))
                 self.move_resize((0, dir_ * constants.STEP))
+                self.ignored = None
 
     def next_image(self):
         self.gif.cur = (self.gif.cur + 1) % self.gif.length()
@@ -124,7 +126,7 @@ class Pampuch(Entity):
     def __init__(self, master, pos):
         if pos is None:
             raise FileFormatError('Pampuch must be instanced exactly once per level')
-        Entity.__init__(self, master, pos, files.Textures.pampuch)
+        Entity.__init__(self, master, pos, files.Textures.pampuch.copy())
         self.new_direction = list()
         self.points = 0
         self.add_handler(pygame_widgets.constants.KEYDOWN, self.change_direction, self_arg=False)
@@ -192,7 +194,7 @@ class Pampuch(Entity):
 
 class Monster(Entity):
     def __init__(self, master, pos, target):
-        Entity.__init__(self, master, pos, files.Textures.monster)
+        Entity.__init__(self, master, pos, files.Textures.monster.copy())
         self.target = target
         self.direction_old = None
         self.cooldown = 0
