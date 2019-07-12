@@ -2,6 +2,7 @@ import pygame_widgets
 import entities
 import files
 import constants
+import time
 from exceptions import FileFormatError
 from multidimensional_array import Multidimensional_array as Md_array
 from pygame_widgets.constants import THECOLORS
@@ -82,7 +83,7 @@ class Gamefield(pygame_widgets.Holder):
             error.level_index = index
             raise error
         else:
-            self.pampuch.attr.img_dead = files.Textures.dead
+            self.pampuch.attr.img_dead = files.Textures.dead.copy()
         for index, pos in enumerate(self.monsters):
             self.monsters[index] = entities.Monster(self, pos, self.pampuch)
         for m in self.monsters:
@@ -102,9 +103,12 @@ class Gamefield(pygame_widgets.Holder):
     def death(self):
         self.pause(True)
         event.post(event.Event(constants.E_DEATH))
-        self.pampuch.set(image=self.pampuch.attr.img_dead)
-        self.restarting = True
         set_timer(constants.E_GAME_STARTED, constants.INSPECTION)
+        for i in range(self.pampuch.attr.img_dead.length()):
+            self.pampuch.set(image=self.pampuch.attr.img_dead.frames[i][0])
+            self.master.update_display()
+            time.sleep(3 / constants.FPS)
+        self.restarting = True
 
     def restart(self):
         self.restarting = False

@@ -1,6 +1,7 @@
 import pygame_widgets
 import constants
 import files
+import time
 _square = constants.SQUARE_SIZE + 4
 
 
@@ -10,6 +11,7 @@ class Live_counter(pygame_widgets.Holder):
         super().__init__(master, topleft, (_square * self.lives, _square))
         self.points = [None] * self.lives
         self.gif = files.Textures.pampuch.copy()
+        self.gif_death = files.Textures.dead.copy()
         self.skip = True
         for i in range(self.lives):
             self.points[i] = pygame_widgets.Image(self, ((i * _square) + 2, 2),
@@ -24,13 +26,15 @@ class Live_counter(pygame_widgets.Holder):
             return
         self.gif.cur = (self.gif.cur + 1) % self.gif.length()
         frame = self.gif.cur
-        for p in self.points:
-            if p.visible:
-                p.set(image=self.gif.frames[frame][0])
-                frame = (frame + 1) % self.gif.length()
+        for p in self.points[:self.lives]:
+            p.set(image=self.gif.frames[frame][0])
+            frame = (frame + 1) % self.gif.length()
 
     def decrease(self):
-        self.points[self.lives - 1].set(visible=False)
+        for i in range(self.gif_death.length()):
+            self.points[self.lives - 1].set(image=self.gif_death.frames[i][0])
+            self.master.update_display()
+            time.sleep(3 / constants.FPS)
         self.lives -= 1
 
     def reset(self):
