@@ -1,6 +1,9 @@
 from constants import PATH
 from multidimensional_array import Multidimensional_array as Md_array
 from pygame_widgets.constants import THECOLORS
+from pygame_widgets.auxiliary.GIFimage import GIFImage
+from pygame import image
+from os.path import exists
 
 
 def load_map(index):
@@ -8,6 +11,15 @@ def load_map(index):
         size = [int(l) for l in map_file.readline()[:-1].split(' ')]
         map_array = Md_array(size, [line[:-1] for line in map_file], ' ')
     return map_array
+
+
+def number_of_levels():
+    index = 0
+    while True:
+        if exists(f"{PATH}/levels/{index}.txt"):
+            index += 1
+        else:
+            return index
 
 
 class Textures:
@@ -18,19 +30,20 @@ class Textures:
     dead = None
     monster = None
     window = THECOLORS['black']
+    label_win_bg = THECOLORS['green3']
+    label_lose_bg = THECOLORS['red2']
 
     def __init__(self):
         raise TypeError('class Textures cannot be instanced')
 
     @classmethod
     def load(cls, index):
-        cls.wall = THECOLORS['gray50']
-        cls.point = THECOLORS['salmon']
-        cls.empty = THECOLORS['transparent']
-        cls.pampuch = THECOLORS['yellow']
+        cls.wall = image.load(f"{PATH}/Textures/Wall.gif")
+        cls.point = image.load(f"{PATH}/Textures/Point.gif")
+        cls.empty = THECOLORS['black']
+        cls.pampuch = GIFImage(f"{PATH}/Textures/Pampuch.gif", False)
         cls.dead = THECOLORS['red3']
-        cls.monster = THECOLORS['blue3']
-        cls.window = THECOLORS['black']
+        cls.monster = GIFImage(f"{PATH}/Textures/Monster.gif", False)
 
 
 if __name__ == "__main__":

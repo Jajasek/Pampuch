@@ -1,8 +1,10 @@
 import pygame_widgets
 import constants
 import files
-from exceptions import FileFormatError, UnknownError
+from exceptions import FileFormatError
 from random import choice
+from pygame import transform
+from pygame_widgets.auxiliary import cursors
 
 
 def left(direction):
@@ -24,7 +26,9 @@ def rightall(direction):
 class Entity(pygame_widgets.Image):
     def __init__(self, master, pos, image):
         self.starting_position = [pos[i] * constants.SQUARE_SIZE for i in range(2)]
-        super().__init__(master, self.starting_position, [constants.SQUARE_SIZE for _ in range(2)], image=image)
+        self.gif = image
+        super().__init__(master, self.starting_position, [constants.SQUARE_SIZE for _ in range(2)],
+                         image=image.frames[image.cur][0], cursor=cursors.invisible)
         self.direction = None  # from 0 to 3, 0 = right, cc
         self.paused = False
         self._move_mappings = {0: (constants.STEP, 0),
@@ -56,7 +60,13 @@ class Entity(pygame_widgets.Image):
                         if stop:
                             self.stop()
                         return False
+            if stop:
+                self.next_image()
             return True
+
+    def next_image(self):
+        self.gif.cur = (self.gif.cur + 1) % self.gif.length()
+        self.set(image=self.gif.frames[self.gif.cur][0])
 
     def try_step(self, direction):
         current = self.direction
@@ -113,6 +123,19 @@ class Pampuch(Entity):
         elif event.key == pygame_widgets.constants.K_SPACE:
             self.new_direction = None
 
+    def next_image(self):
+        self.gif.cur = (self.gif.cur + 1) % self.gif.length()
+        image = self.gif.frames[self.gif.cur][0]
+        if self.direction in [1, 2]:
+            image = transform.flip(image, True, False)
+        if self.direction in [1, 3]:
+            image = transform.rotate(image, -90)
+        self.set(image=image)
+
+    def reset_image(self):
+        self.gif.reset()
+        self.set(image=self.gif.frames[self.gif.cur][0])
+
     def apply_changes(self):
         topleft = self.master_rect.topleft[:]
         for i in range(2):
@@ -156,6 +179,8 @@ class Monster(Entity):
         self.master.death()
 
     def step(self, stop=True):
+        if self.paused:
+            return
         self.check()
         if self.cooldown:
             self.cooldown -= 1
