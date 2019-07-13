@@ -30,7 +30,6 @@ class Entity(pygame_widgets.Image):
         super().__init__(master, self.starting_position, [constants.SQUARE_SIZE for _ in range(2)],
                          image=image.frames[image.cur][0], cursor=cursors.invisible)
         self.direction = None  # from 0 to 3, 0 = right, cc
-        self.ignored = None
         self.paused = False
         self._move_mappings = {0: (constants.STEP, 0),
                                1: (0, -constants.STEP),
@@ -47,11 +46,11 @@ class Entity(pygame_widgets.Image):
         if self.direction is not None and not self.paused:
             self.move_resize(self._move_mappings[self.direction])
             for square in self.surroundings():
-                if square == self.ignored:
+                if isinstance(self, Monster) and square == self.ignored:
                     continue
                 if square.attr.type == 'wall' and self.master_rect.colliderect(square.master_rect):
                     intersection = self.master_rect.clip(square.master_rect)
-                    if intersection.size == (constants.STEP, constants.STEP):
+                    if intersection.size == (constants.STEP, constants.STEP) and isinstance(self, Monster):
                         self.ignored = square
                         continue
                     self.move_resize(self._move_mappings[(self.direction + 2) % 4])
@@ -65,27 +64,11 @@ class Entity(pygame_widgets.Image):
                         if stop:
                             self.stop()
                         return False
-            if self.ignored:
+            if isinstance(self, Monster) and self.ignored:
                 self.check_ignored()
             if stop:
                 self.next_image()
             return True
-
-    def check_ignored(self):
-        if not self.master_rect.colliderect(self.ignored.master_rect):
-            self.ignored = None
-            return
-        x, y = [self.ignored.master_rect.topleft[i] - self.master_rect.topleft[i] for i in range(2)]
-        if self.direction % 2:
-            if abs(x) == constants.STEP * 3 and not y:
-                dir_ = -(x // abs(x))
-                self.move_resize((dir_ * constants.STEP, 0))
-                self.ignored = None
-        else:
-            if abs(y) == constants.STEP * 3 and not x:
-                dir_ = -(y // abs(y))
-                self.move_resize((0, dir_ * constants.STEP))
-                self.ignored = None
 
     def next_image(self):
         self.gif.cur = (self.gif.cur + 1) % self.gif.length()
@@ -135,8 +118,8 @@ class Pampuch(Entity):
         self.handlers[pygame_widgets.constants.E_LOOP_STARTED].reverse()
 
     def change_direction(self, event):
-        if len(self.new_direction) > constants.QUEUE_SIZE:
-            return
+        if len(self.new_direction) >= constants.QUEUE_SIZE:
+            self.new_direction.pop(0)
         if event.key == pygame_widgets.constants.K_d:
             self.new_direction.append(0)
         elif event.key == pygame_widgets.constants.K_w:
@@ -198,6 +181,7 @@ class Monster(Entity):
         self.target = target
         self.direction_old = None
         self.cooldown = 0
+        self.ignored = None
         self.colleagues = None
 
     def check(self):
@@ -226,6 +210,35 @@ class Monster(Entity):
             if output is not None:
                 self.direction_old = self.direction
             return output
+
+    def check_ignored(self):
+        if not self.master_rect.colliderect(self.ignored.master_rect):
+            self.ignored = None
+            return
+        x, y = [self.ignored.master_rect.topleft[i] - self.master_rect.topleft[i] for i in range(2)]
+        if self.direction % 2:
+            if abs(x) == constants.STEP * 3 and not y:
+                dir_ = -(x // abs(x))
+                self.ignored = None
+                self.push(dir_)
+                """monster = self
+                while True:
+                    monster.move_resize((dir_ * constants.STEP, 0))
+                    for m in monster.colleagues:
+                        if monster.master_rect.colliderect(m.master_rect):
+                            monster = m"""
+        else:
+            if abs(y) == constants.STEP * 3 and not x:
+                dir_ = -(y // abs(y))
+                # self.move_resize((0, dir_ * constants.STEP))
+                self.ignored = None
+                self.push(dir_)
+
+    def push(self, dir_):
+        self.move_resize((dir_ * constants.STEP, 0))
+        for m in self.colleagues:
+            if self.master_rect.colliderect(m.master_rect):
+                m.push(dir_)
 
     def stop(self):
         self.direction = self.find_direction()

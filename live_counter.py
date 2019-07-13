@@ -31,12 +31,14 @@ class Live_counter(pygame_widgets.Holder):
             frame = (frame + 1) % self.gif.length()
 
     def decrease(self):
-        for i in range(self.gif_death.length()):
-            self.points[self.lives - 1].set(image=self.gif_death.frames[i][0])
-            self.master.update_display()
-            time.sleep(3 / constants.FPS)
-        self.lives -= 1
+        if self.lives:
+            for i in range(self.gif_death.length()):
+                self.points[self.lives - 1].set(image=self.gif_death.frames[i][0])
+                self.master.update_display()
+                time.sleep(3 / constants.FPS)
+            self.lives -= 1
 
     def reset(self):
         for p in self.points:
-            p.set(visible=True)
+            p.set(image=self.gif.frames[self.gif.cur][0])
+        self.lives = len(self.points)

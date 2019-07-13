@@ -4,10 +4,14 @@ from pygame_widgets.constants import *
 from gamefield import Gamefield
 from files import Textures, get_best, set_best
 from live_counter import Live_counter
+from pygame import event
 
 
 def restart():
     global gamefield
+    if gamefield is not None:
+        gamefield.delete()
+    event.get()
     counter.reset()
     gamefield = Gamefield(window)
     gamefield.start_game(constants.STARTING_LEVEL)
@@ -33,7 +37,7 @@ gamefield = None
 restart()
 
 while True:
-    window.handle_events(*pygame_widgets.pygame.event.get())
+    window.handle_events(*event.get())
     label_fps.set(text=f"fps: {window.get_fps()} {label_fps.my_surf.get_size()}")
     label_score.set(text=f"Score: {gamefield.score}")
     if gamefield.score > best_score:

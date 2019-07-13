@@ -112,6 +112,7 @@ class Gamefield(pygame_widgets.Holder):
 
     def restart(self):
         self.restarting = False
+        set_timer(constants.E_GAME_STARTED, 0)
         if self.lives:
             self.lives -= 1
             self.pampuch.reset_image()
