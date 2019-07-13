@@ -56,7 +56,7 @@ class Textures:
         cls.point = image.load(f"{PATH}/Textures/Point.gif")
         cls.empty = THECOLORS['black']
         cls.pampuch = GIFImage(f"{PATH}/Textures/Pampuch.gif", False)
-        cls.dead = GIFImage(f"{PATH}/Textures/Death.gif", False)
+        cls.dead = GIFImage(f"{PATH}/Textures/Death_0.gif", False)
         cls.monster = GIFImage(f"{PATH}/Textures/Monster.gif", False)
 
 

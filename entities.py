@@ -51,6 +51,7 @@ class Entity(pygame_widgets.Image):
                 if square.attr.type == 'wall' and self.master_rect.colliderect(square.master_rect):
                     intersection = self.master_rect.clip(square.master_rect)
                     if intersection.size == (constants.STEP, constants.STEP) and isinstance(self, Monster):
+                        # noinspection PyAttributeOutsideInit
                         self.ignored = square
                         continue
                     self.move_resize(self._move_mappings[(self.direction + 2) % 4])
