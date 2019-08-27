@@ -4,7 +4,8 @@ import files
 import constants
 import time
 from exceptions import FileFormatError
-from multidimensional_array import Multidimensional_array as Md_array
+from MyLib.multidimensional_array import Multidimensional_array as Md_array
+from shared_data import Game_state
 from pygame_widgets.constants import THECOLORS
 from pygame_widgets.auxiliary import cursors
 from pygame.time import set_timer
@@ -14,6 +15,7 @@ from pygame import event
 class Gamefield(pygame_widgets.Holder):
     def __init__(self, master):
         super().__init__(master)
+        self.game_state = Game_state()
         self.lives = constants.LIVES
         self.levels = files.number_of_levels()
         self.level = 0

@@ -8,20 +8,30 @@ from pygame import event
 
 
 def restart():
-    global gamefield
+    global gamefield, paused
     if gamefield is not None:
         gamefield.delete()
     event.get()
     counter.reset()
+    paused = False
     gamefield = Gamefield(window)
     gamefield.start_game(constants.STARTING_LEVEL)
 
 
+def pause(e):
+    if e.key == K_ESCAPE:
+        global paused
+        paused = not paused
+        gamefield.pause(paused)
+
+
 Textures.load()
 best_score = get_best()
+paused = False
 window = pygame_widgets.Window(flags=FULLSCREEN, bg_color=Textures.window, fps=constants.FPS)
-window.add_handler(KEYDOWN, lambda e: restart() if e.key == K_RETURN and gamefield.game_finished else None,
+window.add_handler(KEYDOWN, lambda e: restart() if e.key == K_RETURN and gamefield.pause() else None,
                    self_arg=False)
+window.add_handler(KEYDOWN, pause, self_arg=False)
 window.add_handler(QUIT, lambda: set_best(best_score), self_arg=False, event_arg=False)
 window.handlers[QUIT].reverse()
 window.add_handler(constants.E_GAME_FINISHED, lambda: set_best(best_score), self_arg=False, event_arg=False)

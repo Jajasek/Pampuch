@@ -1,5 +1,5 @@
 from constants import PATH
-from multidimensional_array import Multidimensional_array as Md_array
+from MyLib.multidimensional_array import Multidimensional_array as Md_array
 from pygame_widgets.constants import THECOLORS
 from pygame_widgets.auxiliary.GIFimage import GIFImage
 from pygame import image
@@ -61,5 +61,5 @@ class Textures:
 
 
 if __name__ == "__main__":
-    map = load_map(0)
-    print(*[map[None, i] for i in range(map.get_dimensions()[1])], sep='\n')
+    map_ = load_map(0)
+    print(*[map_[None, i] for i in range(map_.get_dimensions()[1])], sep='\n')

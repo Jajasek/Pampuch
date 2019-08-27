@@ -46,10 +46,16 @@ class Entity(pygame_widgets.Image):
         if self.direction is not None and not self.paused:
             self.move_resize(self._move_mappings[self.direction])
             for square in self.surroundings():
+                intersection = self.master_rect.clip(square.master_rect)
                 if isinstance(self, Monster) and square == self.ignored:
-                    continue
+                    continue_ = False
+                    for lenght in intersection:
+                        if lenght <= constants.STEP:
+                            continue_ = True
+                            break
+                    if continue_:
+                        continue
                 if square.attr.type == 'wall' and self.master_rect.colliderect(square.master_rect):
-                    intersection = self.master_rect.clip(square.master_rect)
                     if intersection.size == (constants.STEP, constants.STEP) and isinstance(self, Monster):
                         # noinspection PyAttributeOutsideInit
                         self.ignored = square
@@ -149,7 +155,6 @@ class Pampuch(Entity):
 
     def apply_changes(self):
         while True:
-            print(self.new_direction, self.direction)
             if not self.new_direction:
                 return
             if self.new_direction[0] == self.direction:
@@ -222,16 +227,9 @@ class Monster(Entity):
                 dir_ = -(x // abs(x))
                 self.ignored = None
                 self.push(dir_)
-                """monster = self
-                while True:
-                    monster.move_resize((dir_ * constants.STEP, 0))
-                    for m in monster.colleagues:
-                        if monster.master_rect.colliderect(m.master_rect):
-                            monster = m"""
         else:
             if abs(y) == constants.STEP * 3 and not x:
                 dir_ = -(y // abs(y))
-                # self.move_resize((0, dir_ * constants.STEP))
                 self.ignored = None
                 self.push(dir_)
 
