@@ -45,11 +45,11 @@ class Entity(pygame_widgets.Image):
     def step(self, stop=True):
         if self.direction is not None and not self.paused:
             self.move_resize(self._move_mappings[self.direction])
-            for square in self.surroundings():
+            for square in self.surroundings().points:
                 intersection = self.master_rect.clip(square.master_rect)
                 if isinstance(self, Monster) and square == self.ignored:
                     continue_ = False
-                    for lenght in intersection:
+                    for lenght in intersection.size:
                         if lenght <= constants.STEP:
                             continue_ = True
                             break
@@ -171,7 +171,7 @@ class Pampuch(Entity):
             self.apply_changes()
 
     def point(self):
-        for square in self.surroundings():
+        for square in self.surroundings().points:
             if square.attr.type == 'point' and self.master_rect.topleft == square.master_rect.topleft:
                 self.points += 1
                 self.master.score += 1
@@ -224,17 +224,17 @@ class Monster(Entity):
         x, y = [self.ignored.master_rect.topleft[i] - self.master_rect.topleft[i] for i in range(2)]
         if self.direction % 2:
             if abs(x) == constants.STEP * 3 and not y:
-                dir_ = -(x // abs(x))
+                dir_ = 1 + (x // abs(x))
                 self.ignored = None
                 self.push(dir_)
         else:
             if abs(y) == constants.STEP * 3 and not x:
-                dir_ = -(y // abs(y))
+                dir_ = 2 - (y // abs(y))
                 self.ignored = None
                 self.push(dir_)
 
     def push(self, dir_):
-        self.move_resize((dir_ * constants.STEP, 0))
+        self.move_resize(self._move_mappings[dir_])
         for m in self.colleagues:
             if self.master_rect.colliderect(m.master_rect):
                 m.push(dir_)
