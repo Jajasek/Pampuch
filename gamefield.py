@@ -34,9 +34,10 @@ class Gamefield(pygame_widgets.Holder):
         if self.game_state.state == 'stopped':
             self.game_state.state = 'playing'
 
-    def start_game(self, level=None):
+    def start_game(self, mode, level=None):
         if level:
             self.game_state.level = level
+        self.game_state.mode = mode
         self.load_map(self.game_state.level)
 
     def info(self, e):
@@ -56,7 +57,7 @@ class Gamefield(pygame_widgets.Holder):
         self.game_state.goal = 0
         self.game_state.points_level = 0
         files.Textures.load(index)
-        map_strings = files.load_map(index)
+        map_strings = files.load_map(index, self.game_state.mode)
         self.move_resize([(self.master.surface.get_size()[i] - (map_strings.get_dimensions()[i] *
                                                                 constants.SQUARE_SIZE)) // 2 for i in range(2)],
                          0, [map_strings.get_dimensions()[i] * constants.SQUARE_SIZE for i in range(2)], False)
@@ -120,6 +121,7 @@ class Gamefield(pygame_widgets.Holder):
             for m in self.monsters:
                 m.move_resize(m.starting_position, 0)
                 m.direction = None
+                m.direction_old = None
             # set_timer(constants.E_GAME_STARTED, constants.INSPECTION)
             return
         self.game_state.state = 'gameover'

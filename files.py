@@ -6,17 +6,21 @@ from pygame import image
 from os.path import exists
 
 
-def load_map(index):
-    with open(f"{PATH}/levels/{index}.txt", "r") as map_file:
+def load_map(index, mode):
+    if mode is None:
+        return
+    with open(f"{PATH}/levels/{mode}/{index}.txt", "r") as map_file:
         size = [int(l) for l in map_file.readline()[:-1].split(' ')]
         map_array = Md_array(size, [line[:-1] for line in map_file], ' ')
     return map_array
 
 
-def number_of_levels():
+def number_of_levels(mode):
+    if mode is None:
+        return 0
     index = 0
     while True:
-        if exists(f"{PATH}/levels/{index}.txt"):
+        if exists(f"{PATH}/levels/{mode}/{index}.txt"):
             index += 1
         else:
             return index

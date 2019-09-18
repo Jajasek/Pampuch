@@ -17,35 +17,37 @@ class Shared_data:
     def first_init(self, *args, **kwargs):
         pass
 
-    def _update(self, key, old_value, new_value):
+    def update(self, key, old_value, new_value):
         pass
 
-    @property
+    """@property
     def update(self):
         return self._update
 
     @update.setter
     def update(self, value):
-        self._update = value
+        self._update = value"""
 
     def delete(self):
         self.instances.remove(self)
 
-    def __setattr__(self, key, value):
+    def __setattr__(self, key, value, update=True):
         old = getattr(self, key, None)
         for instance in self.instances:
             object.__setattr__(instance, key, value)
-        self.update(key, old, value)
+        if update:
+            self.update(key, old, value)
 
 
 class Game_state(Shared_data):
     # noinspection PyAttributeOutsideInit
     def first_init(self, *args, **kwargs):
         self.lives = constants.LIVES
-        self.level = constants.STARTING_LEVEL
+        self.mode = None  # can be 'Original', 'Test' or None
+        self.level = constants.STARTING_LEVEL[self.mode]
+        self.state = 'stopped'  # can be 'stopped', 'playing', 'win', 'death' or 'gameover'
+        self.levels = files.number_of_levels(self.mode)
         self.pause = False
         self.points = 0
         self.points_level = 0
         self.goal = 0
-        self.levels = files.number_of_levels()
-        self.state = 'stopped'  # can be 'stopped', 'playing', 'win', 'death' or 'gameover'
