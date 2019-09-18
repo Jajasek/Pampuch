@@ -6,7 +6,7 @@ import time
 from exceptions import FileFormatError
 from MyLib.multidimensional_array import Multidimensional_array as Md_array
 from shared_data import Game_state
-from pygame_widgets.constants import THECOLORS
+from pygame_widgets.constants import THECOLORS, KEYDOWN
 from pygame_widgets.auxiliary import cursors
 from pygame.time import set_timer
 from pygame import event
@@ -16,42 +16,45 @@ class Gamefield(pygame_widgets.Holder):
     def __init__(self, master):
         super().__init__(master)
         self.game_state = Game_state()
-        self.lives = constants.LIVES
-        self.levels = files.number_of_levels()
-        self.level = 0
-        self.goal = 0
-        self.score = 0
+        self.game_state.first_init()
         self.map_widgets = None
         self.pampuch = None
         self.monsters = list()
-        self.restarting = False
-        self.game_finished = False
         self.label_info = pygame_widgets.Label(self, visible=False, font="trebuchet_ms", font_size=60, alignment_x=1,
                                                alignment_y=1, font_color=THECOLORS['white'], bold=True, italic=True,
                                                cursor=cursors.invisible)
-        self.add_handler(constants.E_GAME_STARTED, self._game_started, self_arg=False, event_arg=False)
+        # self.add_handler(constants.E_GAME_STARTED, self._game_started, self_arg=False, event_arg=False)
+        self.add_handler(KEYDOWN, self._game_started, self_arg=False, event_arg=False)
+        self.add_handler(constants.E_DEATH, self.restart, self_arg=False, event_arg=False)
+        self.add_handler(constants.E_STATE_CHANGED, self.info, self_arg=False, event_arg=True)
 
     def _game_started(self):
-        set_timer(constants.E_GAME_STARTED, 0)
-        self.restart() if self.restarting else self.pause(False)
+        # set_timer(constants.E_GAME_STARTED, 0)
+        # self.restart() if self.restarting else self.pause(False)
+        if self.game_state.state == 'stopped':
+            self.game_state.state = 'playing'
 
-    def start_game(self, level):
-        self.level = level
-        self.load_map(level)
+    def start_game(self, level=None):
+        if level:
+            self.game_state.level = level
+        self.load_map(self.game_state.level)
 
-    def info(self, death=True):
-        self.game_finished = True
-        event.post(event.Event(constants.E_GAME_FINISHED, score=self.score, win=not death))
+    def info(self, e):
+        if e.key != 'state' or e.new_value not in ['win', 'gameover']:
+            return
+        # self.game_finished = True
+        # event.post(event.Event(constants.E_GAME_FINISHED, score=self.score, win=not death))
         x, y = self.master_rect.size
         self.label_info.move_resize((0, (y - (x // constants.LABEL_RATIO)) // 2), 0, (x, x // constants.LABEL_RATIO),
                                     False)
-        self.label_info.set(background=files.Textures.label_lose_bg if death else files.Textures.label_win_bg,
-                            text="Game over" if death else "You have won!", visible=True)
+        self.label_info.set(background=files.Textures.label_win_bg if e.new_value == 'win' else files.Textures.label_lose_bg,
+                            text="You have won!" if e.new_value == 'win' else "Game over", visible=True)
 
     def load_map(self, index):
         self.pampuch = None
         self.monsters = list()
-        self.goal = 0
+        self.game_state.goal = 0
+        self.game_state.points_level = 0
         files.Textures.load(index)
         map_strings = files.load_map(index)
         self.move_resize([(self.master.surface.get_size()[i] - (map_strings.get_dimensions()[i] *
@@ -72,20 +75,17 @@ class Gamefield(pygame_widgets.Holder):
                 self.map_widgets[pos].attr.img_empty = files.Textures.empty
                 self.map_widgets[pos].attr.type = 'point'
                 self.map_widgets[pos].set(image=files.Textures.point)
-                self.goal += 1
+                self.game_state.goal += 1
             if field == constants.CHAR_PAMPUCH:
                 if self.pampuch is not None:
                     raise FileFormatError('Pampuch must be instanced exactly once per level', level_index=index)
                 self.pampuch = pos
             elif field == constants.CHAR_MONSTER:
                 self.monsters.append(pos)
-        try:
-            self.pampuch = entities.Pampuch(self, self.pampuch)
-        except FileFormatError as error:
-            error.level_index = index
-            raise error
-        else:
-            self.pampuch.attr.img_dead = files.Textures.dead.copy()
+        if self.pampuch is None:
+            raise FileFormatError('Pampuch must be instanced exactly once per level', level_index=index)
+        self.pampuch = entities.Pampuch(self, self.pampuch)
+        self.pampuch.attr.img_dead = files.Textures.dead.copy()
         for index, pos in enumerate(self.monsters):
             self.monsters[index] = entities.Monster(self, pos, self.pampuch)
         for m in self.monsters:
@@ -93,30 +93,26 @@ class Gamefield(pygame_widgets.Holder):
             others.remove(m)
             m.colleagues = others
         self.children = self.children[1:] + self.children[:1]
-        self.pause(True)
-        set_timer(constants.E_GAME_STARTED, constants.INSPECTION)
-
-    def pause(self, value=None):
-        if value is None:
-            return self.pampuch.pause
-        for e in self.monsters + [self.pampuch]:
-            e.pause(value)
+        # self.pause(True)
+        # set_timer(constants.E_GAME_STARTED, constants.INSPECTION)
 
     def death(self):
-        self.pause(True)
-        event.post(event.Event(constants.E_DEATH))
-        set_timer(constants.E_GAME_STARTED, constants.INSPECTION)
+        # self.pause(True)
+        # event.post(event.Event(constants.E_DEATH))
+        set_timer(constants.E_DEATH, constants.INSPECTION)
+        self.game_state.state = 'death'
+        self.game_state.lives -= 1
         for i in range(self.pampuch.attr.img_dead.length()):
             self.pampuch.set(image=self.pampuch.attr.img_dead.frames[i][0])
             self.master.update_display()
             time.sleep(3 / constants.FPS)
-        self.restarting = True
+        # self.restarting = True
 
     def restart(self):
-        self.restarting = False
-        set_timer(constants.E_GAME_STARTED, 0)
-        if self.lives:
-            self.lives -= 1
+        # self.restarting = False
+        set_timer(constants.E_DEATH, 0)
+        if self.game_state.lives >= 0:
+            self.game_state.state = 'stopped'
             self.pampuch.reset_image()
             self.pampuch.move_resize(self.pampuch.starting_position, 0)
             self.pampuch.direction = None
@@ -124,20 +120,23 @@ class Gamefield(pygame_widgets.Holder):
             for m in self.monsters:
                 m.move_resize(m.starting_position, 0)
                 m.direction = None
-            set_timer(constants.E_GAME_STARTED, constants.INSPECTION)
+            # set_timer(constants.E_GAME_STARTED, constants.INSPECTION)
             return
-        self.info()
+        self.game_state.state = 'gameover'
+        # self.info()
 
     def level_completed(self):
-        self.pause(True)
-        self.level += 1
-        if self.level == self.levels:
-            self.info(False)
+        # self.pause(True)
+        self.game_state.level += 1
+        if self.game_state.level == self.game_state.levels:
+            self.game_state.state = 'win'
+            # self.info(False)
             return
+        self.game_state.state = 'stopped'
         for child in self.children[:-1]:
             child.delete()
         del self.children[:-1]
         self.map_widgets = None
         self.pampuch = None
         self.monsters = list()
-        self.load_map(self.level)
+        self.load_map(self.game_state.level)

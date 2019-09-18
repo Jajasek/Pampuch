@@ -5,6 +5,7 @@ from exceptions import FileFormatError
 from random import choice
 from pygame import transform
 from pygame_widgets.auxiliary import cursors
+from shared_data import Game_state
 
 
 def left(direction):
@@ -30,20 +31,15 @@ class Entity(pygame_widgets.Image):
         super().__init__(master, self.starting_position, [constants.SQUARE_SIZE for _ in range(2)],
                          image=image.frames[image.cur][0], cursor=cursors.invisible)
         self.direction = None  # from 0 to 3, 0 = right, cc
-        self.paused = False
+        self.game_state = Game_state()
         self._move_mappings = {0: (constants.STEP, 0),
                                1: (0, -constants.STEP),
                                2: (-constants.STEP, 0),
                                3: (0, constants.STEP)}
         self.add_handler(pygame_widgets.constants.E_LOOP_STARTED, self.step, self_arg=False, event_arg=False)
 
-    def pause(self, value=None):
-        if value is None:
-            return self.paused
-        self.paused = bool(value)
-
     def step(self, stop=True):
-        if self.direction is not None and not self.paused:
+        if self.direction is not None and not self.game_state.pause and self.game_state.state == 'playing':
             self.move_resize(self._move_mappings[self.direction])
             for square in self.surroundings().points:
                 intersection = self.master_rect.clip(square.master_rect)
@@ -118,7 +114,6 @@ class Pampuch(Entity):
             raise FileFormatError('Pampuch must be instanced exactly once per level')
         Entity.__init__(self, master, pos, files.Textures.pampuch.copy())
         self.new_direction = list()
-        self.points = 0
         self.add_handler(pygame_widgets.constants.KEYDOWN, self.change_direction, self_arg=False)
         self.add_handler(pygame_widgets.constants.E_LOOP_STARTED, self.apply_changes, self_arg=False, event_arg=False)
         self.add_handler(pygame_widgets.constants.E_LOOP_STARTED, self.point, self_arg=False, event_arg=False)
@@ -166,18 +161,18 @@ class Pampuch(Entity):
                 return
         if self.new_direction[0] is None or self.try_step(self.new_direction[0]):
             self.direction = self.new_direction.pop(0)
-        elif self.direction is None and not self.paused:
+        elif self.direction is None and not self.game_state.pause and self.game_state.state == 'playing':
             self.new_direction.pop(0)
             self.apply_changes()
 
     def point(self):
         for square in self.surroundings().points:
             if square.attr.type == 'point' and self.master_rect.topleft == square.master_rect.topleft:
-                self.points += 1
-                self.master.score += 1
+                self.game_state.points_level += 1
+                self.game_state.points += 1
                 square.attr.type = 'empty'
                 square.set(image=square.attr.img_empty)
-                if self.points == self.master.goal:
+                if self.game_state.points_level == self.game_state.goal:
                     self.master.level_completed()
 
 
@@ -198,7 +193,7 @@ class Monster(Entity):
         self.master.death()
 
     def step(self, stop=True):
-        if self.paused:
+        if self.game_state.pause or self.game_state.state != 'playing':
             return
         self.check()
         if self.cooldown:

@@ -17,7 +17,7 @@ class Live_counter(pygame_widgets.Holder):
             self.points[i] = pygame_widgets.Image(self, ((i * _square) + 2, 2),
                                                   (constants.SQUARE_SIZE, constants.SQUARE_SIZE),
                                                   image=self.gif.frames[self.gif.cur][0])
-        self.add_handler(constants.E_DEATH, self.decrease, self_arg=False, event_arg=False)
+        self.add_handler(constants.E_STATE_CHANGED, self.decrease, self_arg=False, event_arg=True)
         self.add_handler(pygame_widgets.constants.E_LOOP_STARTED, self.next_frame, self_arg=False, event_arg=False)
 
     def next_frame(self):
@@ -30,8 +30,10 @@ class Live_counter(pygame_widgets.Holder):
             p.set(image=self.gif.frames[frame][0])
             frame = (frame + 1) % self.gif.length()
 
-    def decrease(self):
-        if self.lives:
+    def decrease(self, event):
+        if event.key != 'lives':
+            return
+        while self.lives > event.new_value and self.lives > 0:
             for i in range(self.gif_death.length()):
                 self.points[self.lives - 1].set(image=self.gif_death.frames[i][0])
                 self.master.update_display()
