@@ -4,7 +4,6 @@ import files
 from exceptions import FileFormatError
 from random import choice
 from pygame import transform
-from pygame_widgets.auxiliary import cursors
 from shared_data import Game_state
 
 
@@ -29,7 +28,7 @@ class Entity(pygame_widgets.Image):
         self.starting_position = [pos[i] * constants.SQUARE_SIZE for i in range(2)]
         self.gif = image
         super().__init__(master, self.starting_position, [constants.SQUARE_SIZE for _ in range(2)],
-                         image=image.frames[image.cur][0], cursor=cursors.invisible)
+                         image=image.frames[image.cur][0])
         self.direction = None  # from 0 to 3, 0 = right, cc
         self.game_state = Game_state()
         self._move_mappings = {0: (constants.STEP, 0),

@@ -6,8 +6,7 @@ import time
 from exceptions import FileFormatError
 from MyLib.multidimensional_array import Multidimensional_array as Md_array
 from shared_data import Game_state
-from pygame_widgets.constants import THECOLORS, KEYDOWN
-from pygame_widgets.auxiliary import cursors
+from pygame_widgets.constants import KEYDOWN
 from pygame.time import set_timer
 from pygame import event
 
@@ -20,13 +19,9 @@ class Gamefield(pygame_widgets.Holder):
         self.map_widgets = None
         self.pampuch = None
         self.monsters = list()
-        self.label_info = pygame_widgets.Label(self, visible=False, font="trebuchet_ms", font_size=60, alignment_x=1,
-                                               alignment_y=1, font_color=THECOLORS['white'], bold=True, italic=True,
-                                               cursor=cursors.invisible)
         # self.add_handler(constants.E_GAME_STARTED, self._game_started, self_arg=False, event_arg=False)
         self.add_handler(KEYDOWN, self._game_started, self_arg=False, event_arg=False)
         self.add_handler(constants.E_DEATH, self.restart, self_arg=False, event_arg=False)
-        self.add_handler(constants.E_STATE_CHANGED, self.info, self_arg=False, event_arg=True)
 
     def _game_started(self):
         # set_timer(constants.E_GAME_STARTED, 0)
@@ -39,17 +34,6 @@ class Gamefield(pygame_widgets.Holder):
             self.game_state.level = level
         self.game_state.mode = mode
         self.load_map(self.game_state.level)
-
-    def info(self, e):
-        if e.key != 'state' or e.new_value not in ['win', 'gameover']:
-            return
-        # self.game_finished = True
-        # event.post(event.Event(constants.E_GAME_FINISHED, score=self.score, win=not death))
-        x, y = self.master_rect.size
-        self.label_info.move_resize((0, (y - (x // constants.LABEL_RATIO)) // 2), 0, (x, x // constants.LABEL_RATIO),
-                                    False)
-        self.label_info.set(background=files.Textures.label_win_bg if e.new_value == 'win' else files.Textures.label_lose_bg,
-                            text="You have won!" if e.new_value == 'win' else "Game over", visible=True)
 
     def load_map(self, index):
         self.pampuch = None
@@ -64,8 +48,7 @@ class Gamefield(pygame_widgets.Holder):
         self.map_widgets = Md_array(map_strings.get_dimensions())
         for pos, field in map_strings.enumerated:
             self.map_widgets[pos] = pygame_widgets.Image(self, [pos[i] * constants.SQUARE_SIZE for i in range(2)],
-                                                         [constants.SQUARE_SIZE for _ in range(2)],
-                                                         cursor=cursors.invisible)
+                                                         [constants.SQUARE_SIZE for _ in range(2)])
             if field == constants.CHAR_WALL:
                 self.map_widgets[pos].attr.type = 'wall'
                 self.map_widgets[pos].set(image=files.Textures.wall)
