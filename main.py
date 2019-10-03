@@ -6,6 +6,7 @@ from files import Textures, get_best, set_best, number_of_levels
 from live_counter import Live_counter
 from pygame import event
 from shared_data import Game_state
+from pause_menu import Pause_menu
 from pygame_widgets.auxiliary import cursors
 
 
@@ -17,7 +18,7 @@ def game_state_update(self, key, old_value, new_value):
     if key == 'pause' and new_value and self.state != 'playing':
         self.__setattr__('pause', False, False)
         return
-    if key in ['lives', 'pause', 'points', 'state']:
+    if key in ['lives', 'pause', 'points', 'state', 'mode']:
         event.post(event.Event(constants.E_STATE_CHANGED, key=key, old_value=old_value, new_value=new_value))
     if key == 'mode':
         self.level = constants.STARTING_LEVEL[new_value]
@@ -31,17 +32,37 @@ def restart(mode):
         gamefield.delete()
     event.get()
     counter.abandon_game()
+    label_info.set(visible=False)
+    game_state.mode = mode
+    for button in main_menu_buttons:
+        button.disconnect()
     gamefield = Gamefield(window)
-    gamefield.start_game(mode)
+    gamefield.start_game()
 
 
 def pause(e):
-    if e.key == K_ESCAPE and game_state.state == 'playing':
-        game_state.pause = not game_state.pause
+    if e.key == K_ESCAPE:
+        if pause_menu.connected:
+            pause_menu.button_resume_click()
+        else:
+            pause_menu.activate()
 
 
 def button_mode_click(self):
     restart(self.text)
+
+
+def pause_button_menu_click(self):
+    self.game_state.pause = False
+    self.game_state.mode = None
+    global gamefield
+    if gamefield is not None:
+        gamefield.delete()
+    counter.abandon_game()
+    label_info.set(visible=False)
+    for button in main_menu_buttons:
+        button.reconnect()
+    self.disconnect()
 
 
 def info(self, event_):
@@ -65,35 +86,36 @@ window.add_handler(KEYDOWN, lambda e: restart(game_state.mode) if e.key == K_RET
                    game_state.state in ['win', 'gameover'] else None, self_arg=False, delay=1)
 window.add_handler(KEYDOWN, pause, self_arg=False)
 window.add_handler(QUIT, lambda: set_best(best_score), self_arg=False, event_arg=False)
+# window.add_handler(constants.E_STATE_CHANGED,
+#                    lambda e: restart(None) if e.key == 'mode' and e.new_value is None else None, self_arg=False)
 window.handlers[QUIT].reverse()
 window.add_handler(constants.E_GAME_FINISHED, lambda: set_best(best_score), self_arg=False, event_arg=False)
 window.add_handler(constants.E_STATE_CHANGED, info, self_arg=True, event_arg=True)
 button_exit = pygame_widgets.Button(window, (0, 18), (100, 17), text="Exit")
 button_exit.add_handler(E_BUTTON_BUMPED, button_wrapper(window.quit))
-# button_mode = pygame_widgets.Button(window, (0, 0), (100, 17), text='Switch mode')
-# button_mode.add_handler(E_BUTTON_BUMPED, button_wrapper(switch_mode))
 
-kwargs = Args(font_name='TrebuchetMS', font_size=50, bold=True, font_color=THECOLORS['white'],
-              bg_normal=THECOLORS['transparent'], bg_mouseover=button_bg(THECOLORS['black'], THECOLORS['red'], 10),
-              bg_pressed=button_bg(THECOLORS['black'], THECOLORS['red4'], 10),
-              cursor_mouseover=pygame_widgets.auxiliary.cursors.hand,
-              cursor_pressed=pygame_widgets.auxiliary.cursors.hand)[1]
-main_menu_buttons = [pygame_widgets.Button(window, (710, 400), (500, 100), text="Original", **kwargs),
-                     pygame_widgets.Button(window, (710, 500), (500, 100), text="Test", **kwargs),
+BUTTON_KWARGS = Args(font_name='TrebuchetMS', font_size=50, bold=True, font_color=THECOLORS['white'],
+                     bg_normal=THECOLORS['transparent'],
+                     bg_mouseover=button_bg(THECOLORS['transparent'], THECOLORS['red'], 10),
+                     bg_pressed=button_bg(THECOLORS['transparent'], THECOLORS['red4'], 10),
+                     cursor_mouseover=pygame_widgets.auxiliary.cursors.hand,
+                     cursor_pressed=pygame_widgets.auxiliary.cursors.hand)[1]
+main_menu_buttons = [pygame_widgets.Button(window, (710, 400), (500, 100), text="Original", **BUTTON_KWARGS),
+                     pygame_widgets.Button(window, (710, 500), (500, 100), text="Test", **BUTTON_KWARGS),
                      ]
 for button in main_menu_buttons:
     button.add_handler(E_BUTTON_BUMPED, button_wrapper(button_mode_click, self_arg=True))
 
 counter = Live_counter(window, (0, 36))
 label_info = pygame_widgets.Label(window, visible=False, font="trebuchet_ms", font_size=60, alignment_x=1,
-                                  alignment_y=1, font_color=THECOLORS['white'], bold=True, italic=True,
-                                  cursor=cursors.invisible)
+                                  alignment_y=1, font_color=THECOLORS['white'], bold=True, italic=True)
 label_score = pygame_widgets.Label(window, (0, 72), auto_res=True, font_color=THECOLORS['yellow'], bold=True,
                                    text="Score: 0")
 label_best = pygame_widgets.Label(window, (0, 90), auto_res=True, font_color=THECOLORS['yellow'], bold=True,
                                   text=f"Best: {best_score}")
+pause_menu = Pause_menu(window, BUTTON_KWARGS)
+pause_menu.button_menu_click = pause_button_menu_click
 gamefield = None
-# restart('Original')
 
 while True:
     window.handle_events(*event.get())

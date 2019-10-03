@@ -6,7 +6,7 @@ import time
 from exceptions import FileFormatError
 from MyLib.multidimensional_array import Multidimensional_array as Md_array
 from shared_data import Game_state
-from pygame_widgets.constants import KEYDOWN
+from pygame_widgets.constants import KEYDOWN, K_ESCAPE
 from pygame.time import set_timer
 from pygame import event
 
@@ -15,12 +15,13 @@ class Gamefield(pygame_widgets.Holder):
     def __init__(self, master):
         super().__init__(master)
         self.game_state = Game_state()
-        self.game_state.first_init()
+        # self.game_state.first_init()
         self.map_widgets = None
         self.pampuch = None
         self.monsters = list()
         # self.add_handler(constants.E_GAME_STARTED, self._game_started, self_arg=False, event_arg=False)
-        self.add_handler(KEYDOWN, self._game_started, self_arg=False, event_arg=False)
+        self.add_handler(KEYDOWN, lambda e: self._game_started() if e.key != K_ESCAPE else None, self_arg=False,
+                         event_arg=True)
         self.add_handler(constants.E_DEATH, self.restart, self_arg=False, event_arg=False)
 
     def _game_started(self):
@@ -29,10 +30,9 @@ class Gamefield(pygame_widgets.Holder):
         if self.game_state.state == 'stopped':
             self.game_state.state = 'playing'
 
-    def start_game(self, mode, level=None):
+    def start_game(self, level=None):
         if level:
             self.game_state.level = level
-        self.game_state.mode = mode
         self.load_map(self.game_state.level)
 
     def load_map(self, index):
