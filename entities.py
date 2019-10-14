@@ -119,6 +119,8 @@ class Pampuch(Entity):
         self.handlers[pygame_widgets.constants.E_LOOP_STARTED].reverse()
 
     def change_direction(self, event):
+        if self.game_state.pause:
+            return
         if len(self.new_direction) >= constants.QUEUE_SIZE:
             self.new_direction.pop(0)
         if event.key == pygame_widgets.constants.K_d:

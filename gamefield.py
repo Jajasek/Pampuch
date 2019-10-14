@@ -20,8 +20,8 @@ class Gamefield(pygame_widgets.Holder):
         self.pampuch = None
         self.monsters = list()
         # self.add_handler(constants.E_GAME_STARTED, self._game_started, self_arg=False, event_arg=False)
-        self.add_handler(KEYDOWN, lambda e: self._game_started() if e.key != K_ESCAPE else None, self_arg=False,
-                         event_arg=True)
+        self.add_handler(KEYDOWN, lambda e: self._game_started() if e.key != K_ESCAPE and not self.game_state.pause
+                         else None, self_arg=False, event_arg=True)
         self.add_handler(constants.E_DEATH, self.restart, self_arg=False, event_arg=False)
 
     def _game_started(self):
@@ -105,6 +105,7 @@ class Gamefield(pygame_widgets.Holder):
                 m.move_resize(m.starting_position, 0)
                 m.direction = None
                 m.direction_old = None
+                m.cooldown = 0
             # set_timer(constants.E_GAME_STARTED, constants.INSPECTION)
             return
         self.game_state.state = 'gameover'
