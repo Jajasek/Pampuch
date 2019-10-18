@@ -50,7 +50,6 @@ class Game_state(Shared_data):
         self.level = constants.STARTING_LEVEL[self.mode]
         self.state = 'stopped'  # can be 'stopped', 'playing', 'win', 'death' or 'gameover'
         self.levels = files.number_of_levels(self.mode)
-        self.pause = False
         self.points = 0
         self.points_level = 0
         self.goal = 0

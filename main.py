@@ -21,9 +21,11 @@ def game_state_update(self, key, old_value, new_value):
     if key in ['lives', 'pause', 'points', 'state', 'mode']:
         event.post(event.Event(constants.E_STATE_CHANGED, key=key, old_value=old_value, new_value=new_value))
     if key == 'mode':
-        self.level = constants.STARTING_LEVEL[new_value]
+        """self.level = constants.STARTING_LEVEL[new_value]
         self.levels = number_of_levels(new_value)
         self.lives = constants.LIVES[new_value]
+        self.points = 0"""
+        self.reset_state()
 
 
 def restart(mode):
