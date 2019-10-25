@@ -67,6 +67,7 @@ def pause_button_menu_click(self):
     label_info.set(visible=False)
     for button in main_menu_buttons:
         button.reconnect()
+    pygame_widgets.delayed_call(self.button_menu.set, appearance='normal')
     self.disconnect()
 
 
@@ -75,6 +76,7 @@ def pause_button_restart_click(self):
     self.game_state.pause = False
     label_info.set(visible=False)
     restart(self.game_state.mode)
+    pygame_widgets.delayed_call(self.button_restart.set, appearance='normal')
     self.disconnect()
 
 

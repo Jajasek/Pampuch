@@ -19,7 +19,7 @@ class Pause_menu(pygame_widgets.Holder):
     def button_resume_click(self):
         mouse.set_pos(self.master.surface.get_size())
         self.game_state.pause = False
-        self.button_resume.set(appearance='normal')
+        pygame_widgets.delayed_call(self.button_resume.set, appearance='normal')
         self.disconnect()
 
     @property
