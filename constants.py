@@ -16,5 +16,5 @@ INSPECTION = 2000
 LABEL_RATIO = 18
 QUEUE_SIZE = 4
 LIVES = {'Original': 4, 'Test': 2, None: 0}
-STARTING_LEVEL = {'Original': 0, 'Test': 0, None: None}
+STARTING_LEVEL = {'Original': 7, 'Test': 0, None: None}
 

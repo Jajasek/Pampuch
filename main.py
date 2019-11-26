@@ -2,7 +2,7 @@ import pygame_widgets
 import constants
 from pygame_widgets.constants import *
 from gamefield import Gamefield
-from files import Textures, get_best, set_best, number_of_levels
+from files import Textures, get_best, set_best, EditFile, number_of_levels
 from live_counter import Live_counter
 from pygame import event, mouse
 from shared_data import Game_state
@@ -55,6 +55,12 @@ def pause(e):
 def button_mode_click(self):
     mouse.set_pos(window.surface.get_size())
     restart(self.text)
+
+
+def button_options_click():
+    constedit = EditFile(f"{constants.PATH}/constants.py")
+    constedit.start()
+    window.quit()
 
 
 def pause_button_menu_click(self):
@@ -120,10 +126,12 @@ BUTTON_KWARGS = Args(font_name='TrebuchetMS', font_size=50, bold=True, font_colo
                      cursor_pressed=pygame_widgets.auxiliary.cursors.hand)[1]
 main_menu_buttons = [pygame_widgets.Button(window, (710, 350), (500, 100), text="Original", **BUTTON_KWARGS),
                      pygame_widgets.Button(window, (710, 450), (500, 100), text="Test", **BUTTON_KWARGS),
-                     pygame_widgets.Button(window, (710, 600), (500, 100), text="Exit", **BUTTON_KWARGS),
+                     pygame_widgets.Button(window, (710, 600), (500, 100), text="Options", **BUTTON_KWARGS),
+                     pygame_widgets.Button(window, (710, 700), (500, 100), text="Exit", **BUTTON_KWARGS),
                      ]
-for button in main_menu_buttons[:-1]:
+for button in main_menu_buttons[:-2]:
     button.add_handler(E_BUTTON_BUMPED, button_wrapper(button_mode_click, self_arg=True))
+main_menu_buttons[-2].add_handler(E_BUTTON_BUMPED, button_wrapper(button_options_click))
 main_menu_buttons[-1].add_handler(E_BUTTON_BUMPED, button_wrapper(window.quit))
 
 counter = Live_counter(window, (0, 36))

@@ -4,6 +4,8 @@ from pygame_widgets.constants import THECOLORS
 from pygame_widgets.auxiliary.GIFimage import GIFImage
 from pygame import image
 from os.path import exists
+import subprocess
+import threading
 
 
 def load_map(index, mode):
@@ -28,15 +30,24 @@ def number_of_levels(mode):
 
 def get_best():
     try:
-        with open("D:/Jáchym/Programování/Python/Pampuch/best.txt", "r") as file:
+        with open(f"{PATH}/best.txt", "r") as file:
             return int(file.read())
     except (FileNotFoundError, ValueError):
         return 0
 
 
 def set_best(value):
-    with open("D:/Jáchym/Programování/Python/Pampuch/best.txt", "w") as file:
+    with open(f"{PATH}/best.txt", "w") as file:
         print(value, end='', file=file)
+
+
+class EditFile(threading.Thread):
+    def __init__(self, file):
+        super().__init__()
+        self.file = file
+
+    def run(self):
+        subprocess.run(['notepad.exe', self.file])
 
 
 class Textures:
@@ -65,5 +76,5 @@ class Textures:
 
 
 if __name__ == "__main__":
-    map_ = load_map(0)
+    map_ = load_map(0, 'Original')
     print(*[map_[None, i] for i in range(map_.get_dimensions()[1])], sep='\n')
