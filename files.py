@@ -45,6 +45,7 @@ class EditFile(threading.Thread):
     def __init__(self, file):
         super().__init__()
         self.file = file
+        self.setDaemon(True)
 
     def run(self):
         subprocess.run(['notepad.exe', self.file])

@@ -4,7 +4,7 @@ import files
 from exceptions import FileFormatError
 from random import choice
 from pygame import transform
-from shared_data import Game_state
+from game_state import Game_state
 
 
 def left(direction):
@@ -21,6 +21,15 @@ def right(direction):
 
 def rightall(direction):
     return tuple([right(direction + f) for f in [-0.5, 0, 0.5]])
+
+
+class Background(pygame_widgets.Image):
+    def __init__(self, *args, pos=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.attr.pos = pos
+
+    def __str__(self):
+        return f"<pygame_widgets.Image; {self.attr.type} at {self.attr.pos}>"
 
 
 class Entity(pygame_widgets.Image):

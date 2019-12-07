@@ -2,10 +2,10 @@ import pygame_widgets
 import constants
 from pygame_widgets.constants import *
 from gamefield import Gamefield
-from files import Textures, get_best, set_best, EditFile, number_of_levels
+from files import Textures, get_best, set_best, EditFile
 from live_counter import Live_counter
 from pygame import event, mouse
-from shared_data import Game_state
+from game_state import Game_state
 from pause_menu import Pause_menu
 from pygame_widgets.auxiliary import cursors
 

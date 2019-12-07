@@ -5,7 +5,7 @@ import constants
 import time
 from exceptions import FileFormatError
 from MyLib.multidimensional_array import Multidimensional_array as Md_array
-from shared_data import Game_state
+from game_state import Game_state
 from pygame_widgets.constants import KEYDOWN, K_ESCAPE
 from pygame.time import set_timer
 from pygame import event
@@ -47,8 +47,8 @@ class Gamefield(pygame_widgets.Holder):
                          0, [map_strings.get_dimensions()[i] * constants.SQUARE_SIZE for i in range(2)], False)
         self.map_widgets = Md_array(map_strings.get_dimensions())
         for pos, field in map_strings.enumerated:
-            self.map_widgets[pos] = pygame_widgets.Image(self, [pos[i] * constants.SQUARE_SIZE for i in range(2)],
-                                                         [constants.SQUARE_SIZE for _ in range(2)])
+            self.map_widgets[pos] = entities.Background(self, [pos[i] * constants.SQUARE_SIZE for i in range(2)],
+                                                        [constants.SQUARE_SIZE for _ in range(2)], pos=pos)
             if field == constants.CHAR_WALL:
                 self.map_widgets[pos].attr.type = 'wall'
                 self.map_widgets[pos].set(image=files.Textures.wall)
@@ -119,9 +119,9 @@ class Gamefield(pygame_widgets.Holder):
             # self.info(False)
             return
         self.game_state.state = 'stopped'
-        for child in self.children[:-1]:
+        for child in self.children:
             child.delete()
-        del self.children[:-1]
+        del self.children[:]
         self.map_widgets = None
         self.pampuch = None
         self.monsters = list()

@@ -1,6 +1,6 @@
 import pygame_widgets
 from pygame import mouse
-from shared_data import Game_state
+from game_state import Game_state
 from pygame_widgets.constants import *
 from constants import PATH
 from files import EditFile
@@ -52,4 +52,3 @@ class Pause_menu(pygame_widgets.Holder):
     def activate(self):
         self.game_state.pause = True
         self.reconnect()
-        pass

@@ -2,7 +2,6 @@ import pygame_widgets
 import constants
 import files
 import time
-from shared_data import Game_state
 _square = constants.SQUARE_SIZE + 4
 
 
