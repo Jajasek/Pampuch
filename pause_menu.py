@@ -1,9 +1,10 @@
 import pygame_widgets
 from pygame import mouse
-from game_state import Game_state
 from pygame_widgets.constants import *
+
 from constants import PATH
 from files import EditFile
+from game_state import Game_state
 
 
 class Pause_menu(pygame_widgets.Holder):

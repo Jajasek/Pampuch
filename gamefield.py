@@ -6,7 +6,7 @@ import time
 from exceptions import FileFormatError
 from MyLib.multidimensional_array import Multidimensional_array as Md_array
 from game_state import Game_state
-from pygame_widgets.constants import KEYDOWN, K_ESCAPE
+from pygame_widgets.constants import KEYDOWN, K_ESCAPE, K_LSUPER
 from pygame.time import set_timer
 from pygame import event
 
@@ -20,7 +20,7 @@ class Gamefield(pygame_widgets.Holder):
         self.pampuch = None
         self.monsters = list()
         # self.add_handler(constants.E_GAME_STARTED, self._game_started, self_arg=False, event_arg=False)
-        self.add_handler(KEYDOWN, lambda e: self._game_started() if e.key != K_ESCAPE and not self.game_state.pause
+        self.add_handler(KEYDOWN, lambda e: self._game_started() if e.key not in {K_ESCAPE, K_LSUPER} and not self.game_state.pause
                          else None, self_arg=False, event_arg=True)
         self.add_handler(constants.E_DEATH, self.restart, self_arg=False, event_arg=False)
 
@@ -44,7 +44,7 @@ class Gamefield(pygame_widgets.Holder):
         map_strings = files.load_map(index, self.game_state.mode)
         self.move_resize([(self.master.surface.get_size()[i] - (map_strings.get_dimensions()[i] *
                                                                 constants.SQUARE_SIZE)) // 2 for i in range(2)],
-                         0, [map_strings.get_dimensions()[i] * constants.SQUARE_SIZE for i in range(2)], False)
+                         1, [map_strings.get_dimensions()[i] * constants.SQUARE_SIZE for i in range(2)], False)
         self.map_widgets = Md_array(map_strings.get_dimensions())
         for pos, field in map_strings.enumerated:
             self.map_widgets[pos] = entities.Background(self, [pos[i] * constants.SQUARE_SIZE for i in range(2)],
@@ -98,11 +98,11 @@ class Gamefield(pygame_widgets.Holder):
         if self.game_state.lives >= 0:
             self.game_state.state = 'stopped'
             self.pampuch.reset_image()
-            self.pampuch.move_resize(self.pampuch.starting_position, 0)
+            self.pampuch.move_resize(self.pampuch.starting_position, 1)
             self.pampuch.direction = None
             self.pampuch.new_direction = list()
             for m in self.monsters:
-                m.move_resize(m.starting_position, 0)
+                m.move_resize(m.starting_position, 1)
                 m.direction = None
                 m.direction_old = None
                 m.cooldown = 0

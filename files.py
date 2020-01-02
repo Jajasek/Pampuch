@@ -1,11 +1,13 @@
-from constants import PATH
-from MyLib.multidimensional_array import Multidimensional_array as Md_array
-from pygame_widgets.constants import THECOLORS
-from pygame_widgets.auxiliary.GIFimage import GIFImage
-from pygame import image
-from os.path import exists
 import subprocess
 import threading
+from os.path import exists
+
+from MyLib.multidimensional_array import Multidimensional_array as Md_array
+from pygame import image
+from pygame_widgets.auxiliary.GIFimage import GIFImage
+from pygame_widgets.constants import THECOLORS
+
+from constants import PATH
 
 
 def load_map(index, mode):

@@ -4,7 +4,7 @@ from pygame_widgets.constants import *
 from gamefield import Gamefield
 from files import Textures, get_best, set_best, EditFile
 from live_counter import Live_counter
-from pygame import event, mouse
+import pygame
 from game_state import Game_state
 from pause_menu import Pause_menu
 from pygame_widgets.auxiliary import cursors
@@ -19,7 +19,8 @@ def game_state_update(self, key, old_value, new_value):
     #     self.__setattr__('pause', False, False)
     #     return
     if key in ['lives', 'pause', 'points', 'state', 'mode']:
-        event.post(event.Event(constants.E_STATE_CHANGED, key=key, old_value=old_value, new_value=new_value))
+        pygame.event.post(pygame.event.Event(constants.E_STATE_CHANGED, key=key, old_value=old_value,
+                                             new_value=new_value))
     if key == 'mode':
         """self.level = constants.STARTING_LEVEL[new_value]
         self.levels = number_of_levels(new_value)
@@ -32,7 +33,7 @@ def restart(mode):
     global gamefield
     if gamefield is not None:
         gamefield.delete()
-    event.get()
+    pygame.event.get()
     counter.abandon_game()
     label_info.set(visible=False)
     game_state.state = 'stopped'
@@ -53,7 +54,7 @@ def pause(e):
 
 
 def button_mode_click(self):
-    mouse.set_pos(window.surface.get_size())
+    pygame.mouse.set_pos(window.surface.get_size())
     restart(self.text)
 
 
@@ -78,7 +79,7 @@ def pause_button_menu_click(self):
 
 
 def pause_button_restart_click(self):
-    mouse.set_pos(window.surface.get_size())
+    pygame.mouse.set_pos(window.surface.get_size())
     self.game_state.pause = False
     label_info.set(visible=False)
     restart(self.game_state.mode)
@@ -95,7 +96,7 @@ def info(self, event_):
         window.children.insert(-1, label_info)
     else:
         window.children.append(label_info)
-    label_info.move_resize((0, (y - (x // constants.LABEL_RATIO)) // 2), 0, (x, x // constants.LABEL_RATIO), False)
+    label_info.move_resize((0, (y - (x // constants.LABEL_RATIO)) // 2), 1, (x, x // constants.LABEL_RATIO), False)
     label_info.set(
         background=Textures.label_win_bg if event_.new_value == 'win' else Textures.label_lose_bg,
         text="You have won!" if event_.new_value == 'win' else "Game over", visible=True)
@@ -147,7 +148,14 @@ pause_menu.button_restart_click = pause_button_restart_click
 gamefield = None
 
 while True:
-    window.handle_events(*event.get())
+    # window.handle_events(*event.get())
+    for event in pygame.event.get():
+        if event.type == ACTIVEEVENT and event.state in (2, 7) and game_state.mode is not None and game_state.state == 'playing':
+            pause_menu.activate()
+        else:
+            if event.type == KEYDOWN:
+                print(event)
+            window.handle_event(event)
     label_score.set(text=f"Score: {game_state.points}")
     if game_state.points > best_score:
         best_score = game_state.points
