@@ -54,7 +54,7 @@ def pause(e):
 
 
 def button_mode_click(self):
-    pygame.mouse.set_pos(window.surface.get_size())
+    pygame.mouse.set_pos((window.surface.get_size()[0], 0))
     restart(self.text)
 
 
@@ -79,7 +79,7 @@ def pause_button_menu_click(self):
 
 
 def pause_button_restart_click(self):
-    pygame.mouse.set_pos(window.surface.get_size())
+    pygame.mouse.set_pos((window.surface.get_size()[0], 0))
     self.game_state.pause = False
     label_info.set(visible=False)
     restart(self.game_state.mode)
