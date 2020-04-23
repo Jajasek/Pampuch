@@ -36,3 +36,8 @@ There are some screenshots:
 ![Screenshot 5](https://github.com/Jajasek/Pampuch/blob/master/Screenshots/5.png)
 
 ![Screenshot 6](https://github.com/Jajasek/Pampuch/blob/master/Screenshots/6.png)
+
+## Contact
+In case the steps described in sections Install and Run fail, please contact me 
+through github (https://github.com/Jajasek/Pampuch/issues) or mail
+jachym.mierva@gmail.com.
