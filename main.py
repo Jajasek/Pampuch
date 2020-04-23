@@ -1,3 +1,23 @@
+# Pampuch - a better version of Pacman
+# Copyright (C) 2019  Jáchym Mierva
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+# Jáchym Mierva
+# jachym.mierva@gmail.com
+
+
 import pygame_widgets
 import constants
 from pygame_widgets.constants import *
@@ -102,63 +122,79 @@ def info(self, event_):
         text="You have won!" if event_.new_value == 'win' else "Game over", visible=True)
 
 
-Textures.load()
-best_score = get_best()
-game_state = Game_state()
-Game_state.update = game_state_update
-window = pygame_widgets.Window(flags=FULLSCREEN, bg_color=Textures.window, fps=constants.FPS)
-window.add_handler(KEYDOWN, lambda e: restart(game_state.mode) if e.key == K_RETURN and
-                   game_state.state in ['win', 'gameover'] else None, self_arg=False, delay=1)
-window.add_handler(KEYDOWN, pause, self_arg=False)
-window.add_handler(QUIT, lambda: set_best(best_score), self_arg=False, event_arg=False)
-# window.add_handler(constants.E_STATE_CHANGED,
-#                    lambda e: restart(None) if e.key == 'mode' and e.new_value is None else None, self_arg=False)
-window.handlers[QUIT].reverse()
-window.add_handler(constants.E_GAME_FINISHED, lambda: set_best(best_score), self_arg=False, event_arg=False)
-window.add_handler(constants.E_STATE_CHANGED, info, self_arg=True, event_arg=True)
-# button_exit = pygame_widgets.Button(window, (0, 18), (100, 17), text="Exit")
-# button_exit.add_handler(E_BUTTON_BUMPED, button_wrapper(window.quit))
+def screenshot():
+    try:
+        with open(f"{constants.PATH}/Screenshots/number.txt", "r") as numfile:
+            value = int(numfile.readline())
+    except (ValueError, FileNotFoundError):
+        value = 0
+    pygame.image.save(window.surface, f"{constants.PATH}/Screenshots/{value}.png")
+    with open(f"{constants.PATH}/Screenshots/number.txt", "w") as numfile:
+        numfile.write(str(value + 1))
 
-BUTTON_KWARGS = Args(font_name='TrebuchetMS', font_size=50, bold=True, font_color=THECOLORS['white'],
-                     bg_normal=THECOLORS['transparent'],
-                     bg_mouseover=button_bg(THECOLORS['transparent'], THECOLORS['red'], 10),
-                     bg_pressed=button_bg(THECOLORS['transparent'], THECOLORS['red4'], 10),
-                     cursor_mouseover=pygame_widgets.auxiliary.cursors.hand,
-                     cursor_pressed=pygame_widgets.auxiliary.cursors.hand)[1]
-main_menu_buttons = [pygame_widgets.Button(window, (710, 350), (500, 100), text="Original", **BUTTON_KWARGS),
-                     pygame_widgets.Button(window, (710, 450), (500, 100), text="Test", **BUTTON_KWARGS),
-                     pygame_widgets.Button(window, (710, 600), (500, 100), text="Options", **BUTTON_KWARGS),
-                     pygame_widgets.Button(window, (710, 700), (500, 100), text="Exit", **BUTTON_KWARGS),
-                     ]
-for button in main_menu_buttons[:-2]:
-    button.add_handler(E_BUTTON_BUMPED, button_wrapper(button_mode_click, self_arg=True))
-main_menu_buttons[-2].add_handler(E_BUTTON_BUMPED, button_wrapper(button_options_click))
-main_menu_buttons[-1].add_handler(E_BUTTON_BUMPED, button_wrapper(window.quit))
 
-counter = Live_counter(window, (0, 36))
-label_info = pygame_widgets.Label(window, visible=False, font="trebuchet_ms", font_size=60, alignment_x=1,
-                                  alignment_y=1, font_color=THECOLORS['white'], bold=True, italic=True)
-label_score = pygame_widgets.Label(window, (0, 72), auto_res=True, font_color=THECOLORS['yellow'], bold=True,
-                                   text="Score: 0")
-label_best = pygame_widgets.Label(window, (0, 90), auto_res=True, font_color=THECOLORS['yellow'], bold=True,
-                                  text=f"Best: {best_score}")
-pause_menu = Pause_menu(window, BUTTON_KWARGS)
-pause_menu.button_menu_click = pause_button_menu_click
-pause_menu.button_restart_click = pause_button_restart_click
-gamefield = None
+def main():
+    global game_state, window, main_menu_buttons, counter, label_info, pause_menu, gamefield
+    Textures.load()
+    best_score = get_best()
+    game_state = Game_state()
+    Game_state.update = game_state_update
+    window = pygame_widgets.Window(flags=FULLSCREEN, bg_color=Textures.window, fps=constants.FPS)
+    window.add_handler(KEYDOWN, lambda e: restart(game_state.mode) if e.key == K_RETURN and
+                       game_state.state in ['win', 'gameover'] else None, self_arg=False, delay=1)
+    window.add_handler(KEYDOWN, pause, self_arg=False)
+    window.add_handler(QUIT, lambda: set_best(best_score), self_arg=False, event_arg=False)
+    window.add_handler(KEYDOWN, lambda e: screenshot() if e.key == K_F2 else None, self_arg=False)
+    # window.add_handler(constants.E_STATE_CHANGED,
+    #                    lambda e: restart(None) if e.key == 'mode' and e.new_value is None else None, self_arg=False)
+    window.handlers[QUIT].reverse()
+    window.add_handler(constants.E_GAME_FINISHED, lambda: set_best(best_score), self_arg=False, event_arg=False)
+    window.add_handler(constants.E_STATE_CHANGED, info, self_arg=True, event_arg=True)
+    # button_exit = pygame_widgets.Button(window, (0, 18), (100, 17), text="Exit")
+    # button_exit.add_handler(E_BUTTON_BUMPED, button_wrapper(window.quit))
 
-while True:
-    # window.handle_events(*event.get())
-    for event in pygame.event.get():
-        if event.type == ACTIVEEVENT and event.state in (2, 7) and game_state.mode is not None and game_state.state == 'playing':
-            pause_menu.activate()
-        else:
-            if event.type == KEYDOWN:
-                print(event)
-            window.handle_event(event)
-    label_score.set(text=f"Score: {game_state.points}")
-    if game_state.points > best_score:
-        best_score = game_state.points
-        label_best.set(text=f"Best: {best_score}")
-    window.update_display()
-    pygame_widgets.new_loop()
+    BUTTON_KWARGS = Args(font_name='TrebuchetMS', font_size=50, bold=True, font_color=THECOLORS['white'],
+                         bg_normal=THECOLORS['transparent'],
+                         bg_mouseover=button_bg(THECOLORS['transparent'], THECOLORS['red'], 10),
+                         bg_pressed=button_bg(THECOLORS['transparent'], THECOLORS['red4'], 10),
+                         cursor_mouseover=pygame_widgets.auxiliary.cursors.hand,
+                         cursor_pressed=pygame_widgets.auxiliary.cursors.hand)[1]
+    main_menu_buttons = [pygame_widgets.Button(window, (710, 350), (500, 100), text="Original", **BUTTON_KWARGS),
+                         pygame_widgets.Button(window, (710, 450), (500, 100), text="Test", **BUTTON_KWARGS),
+                         pygame_widgets.Button(window, (710, 600), (500, 100), text="Options", **BUTTON_KWARGS),
+                         pygame_widgets.Button(window, (710, 700), (500, 100), text="Exit", **BUTTON_KWARGS),
+                         ]
+    for button in main_menu_buttons[:-2]:
+        button.add_handler(E_BUTTON_BUMPED, button_wrapper(button_mode_click, self_arg=True))
+    main_menu_buttons[-2].add_handler(E_BUTTON_BUMPED, button_wrapper(button_options_click))
+    main_menu_buttons[-1].add_handler(E_BUTTON_BUMPED, button_wrapper(window.quit))
+
+    counter = Live_counter(window, (0, 36))
+    label_info = pygame_widgets.Label(window, visible=False, font="trebuchet_ms", font_size=60, alignment_x=1,
+                                      alignment_y=1, font_color=THECOLORS['white'], bold=True, italic=True)
+    label_score = pygame_widgets.Label(window, (0, 72), auto_res=True, font_color=THECOLORS['yellow'], bold=True,
+                                       text="Score: 0")
+    label_best = pygame_widgets.Label(window, (0, 90), auto_res=True, font_color=THECOLORS['yellow'], bold=True,
+                                      text=f"Best: {best_score}")
+    pause_menu = Pause_menu(window, BUTTON_KWARGS)
+    pause_menu.button_menu_click = pause_button_menu_click
+    pause_menu.button_restart_click = pause_button_restart_click
+    gamefield = None
+
+    while True:
+        # window.handle_events(*event.get())
+        for event in pygame.event.get():
+            if event.type == ACTIVEEVENT and event.state in (2, 7) and game_state.mode is not None and game_state.state == 'playing':
+                pause_menu.activate()
+            else:
+                window.handle_event(event)
+        label_score.set(text=f"Score: {game_state.points}")
+        if game_state.points > best_score:
+            best_score = game_state.points
+            label_best.set(text=f"Best: {best_score}")
+        window.update_display()
+        pygame_widgets.new_loop()
+
+
+if __name__ == '__main__':
+    main()
