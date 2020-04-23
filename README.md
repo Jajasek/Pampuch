@@ -5,7 +5,7 @@ reimplementation for Windows 10; it should work basically on every platform
 that supports pygame (see https://www.pygame.org/wiki/about).
 
 ## Instalation
-* Install python 3.7.1 or newer
+* Install python 3.7.1 or newer (see https://www.python.org/downloads/)
 * Install all the requirements listed in requirements.txt. These are:
     - pygame - the low-level GUI library that is used to handle graphics. 
       To install it, on most systems run `python3 -m pip install -U pygame --user`.
@@ -36,6 +36,9 @@ There are some screenshots:
 ![Screenshot 5](https://github.com/Jajasek/Pampuch/blob/master/Screenshots/5.png)
 
 ![Screenshot 6](https://github.com/Jajasek/Pampuch/blob/master/Screenshots/6.png)
+
+Note: the `Options` button in main menu and pause menu works (probably) only on Windows. 
+To change options on other systems, edit the file `constants.py`.
 
 ## Contact
 In case the steps described in sections Install and Run fail, please contact me 
