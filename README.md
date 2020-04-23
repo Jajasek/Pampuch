@@ -24,3 +24,15 @@ To run the game, run the file `main.py`. This can be done using command
 python <your path to Pampuch>/Pampuch/main.py
 ```
 On Windows you can double-click to the script `run.bat` instead.
+
+There are some screenshots:
+
+![Screenshot 0](https://github.com/Jajasek/Pampuch/blob/master/Screenshots/0.png)
+
+![Screenshot 3](https://github.com/Jajasek/Pampuch/blob/master/Screenshots/3.png)
+
+![Screenshot 4](https://github.com/Jajasek/Pampuch/blob/master/Screenshots/4.png)
+
+![Screenshot 5](https://github.com/Jajasek/Pampuch/blob/master/Screenshots/5.png)
+
+![Screenshot 6](https://github.com/Jajasek/Pampuch/blob/master/Screenshots/6.png)
