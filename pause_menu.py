@@ -35,6 +35,7 @@ class Pause_menu(pygame_widgets.Holder):
         self.button_resume.add_handler(E_BUTTON_BUMPED, button_wrapper(self.button_resume_click))
         self.button_resume.set(shortcut_key=K_SPACE)
         self.button_menu = pygame_widgets.Button(self, (710, 420), (500, 100), text="Main menu", **button_kwargs)
+        self.button_menu.set(shortcut_key=K_m)
         self.button_restart = pygame_widgets.Button(self, (710, 520), (500, 100), text="Restart", **button_kwargs)
         self.button_restart.set(shortcut_key=K_RETURN)
         self.button_options = pygame_widgets.Button(self, (710, 670), (500, 100), text="Options", **button_kwargs)

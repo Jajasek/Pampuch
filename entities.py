@@ -57,7 +57,7 @@ class Entity(pygame_widgets.Image):
         self.starting_position = [pos[i] * constants.SQUARE_SIZE for i in range(2)]
         self.gif = image
         super().__init__(master, self.starting_position, [constants.SQUARE_SIZE for _ in range(2)],
-                         image=image.frames[image.cur][0])
+                         image=image.frames[image.cur][0], cursor=pygame_widgets.cursors.invisible)
         self.direction = None  # from 0 to 3, 0 = right, cc
         self.game_state = Game_state()
         self._move_mappings = {0: (constants.STEP, 0),

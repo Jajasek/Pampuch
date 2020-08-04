@@ -162,7 +162,8 @@ def main():
     main_menu_buttons = [pygame_widgets.Button(window, (710, 350), (500, 100), text="Original", **BUTTON_KWARGS),
                          pygame_widgets.Button(window, (710, 450), (500, 100), text="Test", **BUTTON_KWARGS),
                          pygame_widgets.Button(window, (710, 600), (500, 100), text="Options", **BUTTON_KWARGS),
-                         pygame_widgets.Button(window, (710, 700), (500, 100), text="Exit", **BUTTON_KWARGS),
+                         pygame_widgets.Button(window, (710, 700), (500, 100), text="Exit", **BUTTON_KWARGS,
+                                               shortcut_key=K_F4),
                          ]
     for button in main_menu_buttons[:-2]:
         button.add_handler(E_BUTTON_BUMPED, button_wrapper(button_mode_click, self_arg=True))

@@ -71,14 +71,14 @@ class Gamefield(pygame_widgets.Holder):
                                                         [constants.SQUARE_SIZE for _ in range(2)], pos=pos)
             if field == constants.CHAR_WALL:
                 self.map_widgets[pos].attr.type = 'wall'
-                self.map_widgets[pos].set(image=files.Textures.wall)
+                self.map_widgets[pos].set(image=files.Textures.wall, cursor=pygame_widgets.cursors.invisible)
             elif field == constants.CHAR_EMPTY:
                 self.map_widgets[pos].attr.type = 'empty'
                 self.map_widgets[pos].set(image=files.Textures.empty)
             else:
                 self.map_widgets[pos].attr.img_empty = files.Textures.empty
                 self.map_widgets[pos].attr.type = 'point'
-                self.map_widgets[pos].set(image=files.Textures.point)
+                self.map_widgets[pos].set(image=files.Textures.point, cursor=pygame_widgets.cursors.invisible)
                 self.game_state.goal += 1
             if field == constants.CHAR_PAMPUCH:
                 if self.pampuch is not None:
