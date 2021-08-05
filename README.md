@@ -15,6 +15,7 @@ that supports pygame (see https://www.pygame.org/wiki/about).
       on https://github.com/Jajasek/pygame_widgets/blob/master/README.md.
     - Pillow - library used to process animated gifs. See the instruction on
       https://pillow.readthedocs.io/en/stable/installation.html.
+    - MyLib - my personal library of useful bits of code. Download the content of the repository https://github.com/Jajasek/MyLib and save it to the folder `<your installation of python>/Lib/site-packages/MyLib`.
 * Copy the entire content of this repository in a folder named `Pampuch` anywhere
   on your computer.
  
