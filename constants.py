@@ -36,5 +36,5 @@ E_STATE_CHANGED = USEREVENT + 3
 INSPECTION = 2000
 LABEL_RATIO = 18
 QUEUE_SIZE = 4
-LIVES = {'Original': 4, 'Test': 3, None: 0}
-STARTING_LEVEL = {'Original': 0, 'Test': 0, None: None}
+LIVES = {'Original': 4, 'Custom': 3, None: 0}
+STARTING_LEVEL = {'Original': 0, 'Custom': 0, None: None}

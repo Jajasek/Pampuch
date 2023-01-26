@@ -160,7 +160,7 @@ def main():
                          cursor_mouseover=pygame_widgets.auxiliary.cursors.hand,
                          cursor_pressed=pygame_widgets.auxiliary.cursors.hand)[1]
     main_menu_buttons = [pygame_widgets.Button(window, (710, 350), (500, 100), text="Original", **BUTTON_KWARGS),
-                         pygame_widgets.Button(window, (710, 450), (500, 100), text="Test", **BUTTON_KWARGS),
+                         pygame_widgets.Button(window, (710, 450), (500, 100), text="Custom", **BUTTON_KWARGS),
                          pygame_widgets.Button(window, (710, 600), (500, 100), text="Options", **BUTTON_KWARGS),
                          pygame_widgets.Button(window, (710, 700), (500, 100), text="Exit", **BUTTON_KWARGS,
                                                shortcut_key=K_F4),

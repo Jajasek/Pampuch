@@ -33,10 +33,10 @@ from constants import PATH
 def load_map(index, mode):
     if mode is None:
         return
-    with open(f"{PATH}/levels/{mode}/{index}.txt", "r") as map_file:
-        size = [int(l) for l in map_file.readline()[:-1].split(' ')]
-        map_array = Md_array(size, [line[:-1] for line in map_file], ' ')
-    return map_array
+    with open(f"{PATH}/Levels/{mode}/{index}.lvl", "r") as map_file:
+        meta = [int(l) for l in map_file.readline()[:-1].split(' ')]
+        map_array = Md_array(meta[:2], [line[:-1] for line in map_file], ' ')
+    return map_array, meta[2]
 
 
 def number_of_levels(mode):
@@ -44,7 +44,7 @@ def number_of_levels(mode):
         return 0
     index = 0
     while True:
-        if exists(f"{PATH}/levels/{mode}/{index}.txt"):
+        if exists(f"{PATH}/Levels/{mode}/{index}.lvl"):
             index += 1
         else:
             return index
@@ -90,14 +90,9 @@ class Textures:
     @classmethod
     def load(cls, index=None):
         if index is not None:
-            cls.wall = image.load(f"{PATH}/Textures/Wall{(index // 3) % 3}.gif")
+            cls.wall = image.load(f"{PATH}/Textures/Wall{index}.gif")
         cls.point = image.load(f"{PATH}/Textures/Point.gif")
         cls.empty = THECOLORS['black']
         cls.pampuch = GIFImage(f"{PATH}/Textures/Pampuch.gif", False)
         cls.dead = GIFImage(f"{PATH}/Textures/Death_0.gif", False)
         cls.monster = GIFImage(f"{PATH}/Textures/Monster.gif", False)
-
-
-if __name__ == "__main__":
-    map_ = load_map(0, 'Original')
-    print(*[map_[None, i] for i in range(map_.get_dimensions()[1])], sep='\n')

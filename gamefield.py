@@ -60,8 +60,8 @@ class Gamefield(pygame_widgets.Holder):
         self.monsters = list()
         self.game_state.goal = 0
         self.game_state.points_level = 0
-        files.Textures.load(index)
-        map_strings = files.load_map(index, self.game_state.mode)
+        map_strings, texture_index = files.load_map(index, self.game_state.mode)
+        files.Textures.load(texture_index)
         self.move_resize([(self.master.surface.get_size()[i] - (map_strings.get_dimensions()[i] *
                                                                 constants.SQUARE_SIZE)) // 2 for i in range(2)],
                          1, [map_strings.get_dimensions()[i] * constants.SQUARE_SIZE for i in range(2)], False)
@@ -72,7 +72,7 @@ class Gamefield(pygame_widgets.Holder):
             if field == constants.CHAR_WALL:
                 self.map_widgets[pos].attr.type = 'wall'
                 self.map_widgets[pos].set(image=files.Textures.wall, cursor=pygame_widgets.cursors.invisible)
-            elif field == constants.CHAR_EMPTY:
+            elif field in {constants.CHAR_EMPTY, constants.CHAR_PAMPUCH}:
                 self.map_widgets[pos].attr.type = 'empty'
                 self.map_widgets[pos].set(image=files.Textures.empty)
             else:

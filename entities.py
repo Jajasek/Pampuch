@@ -95,10 +95,12 @@ class Entity(pygame_widgets.Image):
                         if stop:
                             self.stop()
                         return False
-            if isinstance(self, Monster) and self.ignored:
-                self.check_ignored()
+                if self.ignored:
+                    self.check_ignored()
             if stop:
                 self.next_image()
+            if isinstance(self, Pampuch):
+                self.point()
             return True
 
     def next_image(self):
@@ -144,7 +146,7 @@ class Pampuch(Entity):
         self.new_direction = list()
         self.add_handler(pygame_widgets.constants.KEYDOWN, self.change_direction, self_arg=False)
         self.add_handler(pygame_widgets.constants.E_LOOP_STARTED, self.apply_changes, self_arg=False, event_arg=False)
-        self.add_handler(pygame_widgets.constants.E_LOOP_STARTED, self.point, self_arg=False, event_arg=False)
+        # self.add_handler(pygame_widgets.constants.E_LOOP_STARTED, self.point, self_arg=False, event_arg=False)
         self.handlers[pygame_widgets.constants.E_LOOP_STARTED].reverse()
 
     def change_direction(self, event):
